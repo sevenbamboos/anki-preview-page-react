@@ -4,3 +4,6 @@
 * [important] adapt typescript
 * child component invoke callback from parent component and update itself at the same time
  
+# Component Design
+
+![Image of Component Design](https://github.com/sevenbamboos/anki-preview-page-react/blob/master/components-design.png)
