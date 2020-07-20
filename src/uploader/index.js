@@ -1,6 +1,6 @@
 
 import React, {useState, useCallback, useEffect} from 'react';
-import {LoadingIndicator} from './styles';
+import {LoadingIndicator, FileInput} from './styles';
 
 function Uploader({doUpload, onMessage, onError}) {
   const [file, setFile] = useState(null);
@@ -34,7 +34,7 @@ function Uploader({doUpload, onMessage, onError}) {
       {isUploading ? (
         <LoadingIndicator>Loading...</LoadingIndicator>
       ) : (
-        <input type="file" onChange={selectFile} />
+        <FileInput type="file" onChange={selectFile} />
       )}
     </>
   );

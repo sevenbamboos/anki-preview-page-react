@@ -1,4 +1,25 @@
-import styled from 'styled-components';
+import styled, {keyframes, css} from 'styled-components';
+import {NavigateNext, NavigateBefore, FirstPage, LastPage} from '@styled-icons/material';
+
+export const FirstPageIcon = styled(FirstPage)`
+  color: black;
+  width: 15px;
+`;
+
+export const LastPageIcon = styled(LastPage)`
+  color: black;
+  width: 15px;
+`;
+
+export const PreviousPageIcon = styled(NavigateBefore)`
+  color: black;
+  width: 15px;
+`;
+
+export const NextPageIcon = styled(NavigateNext)`
+  color: black;
+  width: 15px;
+`;
 
 export const PopUpContainer = styled.div`
   display: ${props => props.show ? 'block' : 'none'};
@@ -30,4 +51,74 @@ export const OutputResultTable = styled.table`
   & td {
     border: 0.5px solid black;
   }
+`;
+
+const comeOutSlowly = keyframes`
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+`;
+
+const comeOutSlowlyAnimation = css`
+  animation: 2s ${comeOutSlowly} forwards;
+`;
+
+export const ErrorBarDiv = styled.div`
+  background: #ffcccc;
+  color: black;
+  padding: 5px;
+  text-align: center;
+  width: auto;
+  margin-right: auto;
+  margin-left:  auto;
+  max-width: 300px;
+  border-radius: 5px;
+  font-size: 10px;
+
+  ${props => props.visible ? 'visibility: visible;' : comeOutSlowlyAnimation};
+`;
+
+export const MessageBarDiv = styled.div`
+  background: #ddd;
+  color: black;
+  padding: 5px;
+  text-align: center;
+  width: auto;
+  max-width: 300px;
+  margin-right: auto;
+  margin-left:  auto;
+  border-radius: 5px;
+  font-size: 10px;
+
+  ${props => props.visible ? 'visibility: visible;' : comeOutSlowlyAnimation};
+`;
+
+export const PaginatorControl = styled.div`
+  background-color: rgb(200, 200, 200, 0.5);
+  color: #333;
+  font-size: 12px;
+  line-height: 30px;
+  margin: 10px;
+  border-radius: 5px;
+  display: flex;
+  justify-content: space-evenly;
+  padding: 3px;
+`;
+
+export const PaginatorButton = styled.button`
+  font-size: 12px;
+  margin: 5px;
+`;
+
+export const PaginatorPageSpan = styled.span`
+  display: flex;
+`;
+
+export const PaginatorPageProgress = styled.progress`
+  margin: 5px;
+  height: 20px;
 `;

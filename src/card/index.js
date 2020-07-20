@@ -1,48 +1,17 @@
-import React, {useReducer, useEffect, useState} from 'react';
+import React, {useReducer, useState} from 'react';
 import * as st from './styles';
-import {setErrorState, setMessageState} from '../utils/error-message';
 import { parseBasic, parseCloze, parseTags } from './card-utils';
-
-const EVENT_SWITCH_TAB = 'EVENT_SWITCH_TAB';
-
-const TAB_SOURCE = 'TAB_SOURCE';
-const TAB_BASIC = 'TAB_BASIC';
-const TAB_CLOZE = 'TAB_CLOZE';
-
-const TABS = {
-  TAB_SOURCE: 'Source',
-  TAB_BASIC: 'Basic',
-  TAB_CLOZE: 'Cloze' 
-};
-
-const initState = {
-  tabName: TAB_BASIC,
-  message: null,
-  error: null,
-};
-
-function switchTab(card, state, tabName) {
-  const currentTab = state.tabName;
-  if (tabName === currentTab) return state;
-
-  if (tabName === TAB_BASIC && !card.forBasic) return setErrorState(state, 'Not For Basic');
-  else if (tabName === TAB_CLOZE && !card.forCloze) return setErrorState(state, 'Not For Cloze');
-
-  return {...setMessageState(state, `Switch To Tab ${TABS[tabName]}`), tabName};
-}
-
-function isCurrentTab(state, tabName) {
-  return state.tabName === tabName;
-}
+import * as store from './card-store';
+import {useMessageAndError} from '../utils/error-message';
 
 function TabBtn({tabName, children, isActive, dispatcher}) {
   return (
     <st.CardButton 
       isActive={isActive}
-      onClick={() => dispatcher({type: EVENT_SWITCH_TAB, payload: tabName})}
-      title={TABS[tabName]}>
+      onClick={() => dispatcher({type: store.EVENT_SWITCH_TAB, payload: tabName})}
+      title={store.TABS[tabName]}>
       {children}  
-      <st.CardButtonText>{TABS[tabName]}</st.CardButtonText>
+      <st.CardButtonText>{store.TABS[tabName]}</st.CardButtonText>
     </st.CardButton>   
   );
 }
@@ -53,14 +22,6 @@ function Tab({name, shouldDisplay, children}) {
       {children}
     </st.CardTab>
   );
-}
-
-function getNextState(current) {
-  if (current === 'question') {
-    return 'answer';
-  } else {
-    return 'question';
-  }
 }
 
 function SourceCard({card}) {
@@ -82,7 +43,7 @@ function BasicCard({card}) {
   if (error) return <st.FlashCardError>{error}</st.FlashCardError>
 
   const [question, answer] = result;
-  const handleClick = () => setState(getNextState(state));
+  const handleClick = () => setState(store.getNextState(state));
   return (
     <>
       <st.FlashCard onClick={handleClick} show={state === 'question'}>
@@ -103,7 +64,7 @@ function ClozeCard({card}) {
   if (error) return <st.FlashCardError>{error}</st.FlashCardError>
 
   const [question, answer] = result;
-  const handleClick = () => setState(getNextState(state));
+  const handleClick = () => setState(store.getNextState(state));
   return (
     <>
       <st.FlashCard onClick={handleClick} show={state === 'question'}>
@@ -117,35 +78,14 @@ function ClozeCard({card}) {
     </>
   );
 }
+
 export default function Card({card, onError, onMessage}) {
 
   const {forCloze, forBasic, tags, cloze, basic, source} = card;
 
-  const cardReducer = (state, action) => {
-    switch (action.type) {
+  const [state, dispatcher] = useReducer(store.cardReducer(card), store.initState);
 
-      case EVENT_SWITCH_TAB: {
-        return switchTab(
-          card,
-          state, 
-          action.payload);
-      }
-
-      default: {
-        throw new Error(`Unknown action type ${action.type}`);
-      }      
-    };
-  };
-
-  const [state, dispatcher] = useReducer(cardReducer, initState);
-
-  useEffect(() => {
-    if (state.message) onMessage(state.message);
-  }, [state.message, onMessage]);
-
-  useEffect(() => {
-    if (state.error) onError(state.error);
-  }, [state.error, onError]);
+  useMessageAndError(state, onMessage, onError);
 
   let tagsContent = null;
   if (tags) {
@@ -160,34 +100,34 @@ export default function Card({card, onError, onMessage}) {
 
       <st.CardControl>
         <TabBtn 
-          tabName={TAB_BASIC} 
-          isActive={isCurrentTab(state, TAB_BASIC)} 
+          tabName={store.TAB_BASIC} 
+          isActive={store.isCurrentTab(state, store.TAB_BASIC)} 
           dispatcher={dispatcher}>
             <st.BasicIcon/>
         </TabBtn>
         <TabBtn 
-          tabName={TAB_CLOZE} 
-          isActive={isCurrentTab(state, TAB_CLOZE)} 
+          tabName={store.TAB_CLOZE} 
+          isActive={store.isCurrentTab(state, store.TAB_CLOZE)} 
           dispatcher={dispatcher}>
             <st.ClozeIcon/>
         </TabBtn>
         <TabBtn 
-          tabName={TAB_SOURCE} 
-          isActive={isCurrentTab(state, TAB_SOURCE)} 
+          tabName={store.TAB_SOURCE} 
+          isActive={store.isCurrentTab(state, store.TAB_SOURCE)} 
           dispatcher={dispatcher}>
             <st.SourceIcon/>
         </TabBtn>
       </st.CardControl>
 
-      <st.CardTab name={TAB_BASIC} shouldDisplay={isCurrentTab(state, TAB_BASIC)}>
+      <st.CardTab name={store.TAB_BASIC} shouldDisplay={store.isCurrentTab(state, store.TAB_BASIC)}>
         <BasicCard card={forBasic ? basic : null} />
       </st.CardTab>
 
-      <st.CardTab name={TAB_CLOZE} shouldDisplay={isCurrentTab(state, TAB_CLOZE)}>
+      <st.CardTab name={store.TAB_CLOZE} shouldDisplay={store.isCurrentTab(state, store.TAB_CLOZE)}>
         <ClozeCard card={forCloze ? cloze : null} />
       </st.CardTab>
 
-      <Tab name={TAB_SOURCE} shouldDisplay={isCurrentTab(state, TAB_SOURCE)}>
+      <Tab name={store.TAB_SOURCE} shouldDisplay={store.isCurrentTab(state, store.TAB_SOURCE)}>
         <SourceCard card={source} />
       </Tab>
 

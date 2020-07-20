@@ -1,22 +1,23 @@
 import React from 'react';
-import {PopUpContainer, PopUpControl, OutputResultTable} from './styles';
+import * as ls from './styles';
+import useTouchAndHide from './touch-hide';
 
 export function InfoDialog({show, children, onClose}) {
   return (
-    <PopUpContainer 
+    <ls.PopUpContainer 
       show={show}
     >
       {children}
-      <PopUpControl>
+      <ls.PopUpControl>
         <button onClick={onClose}>OK</button>
-      </PopUpControl>
-    </PopUpContainer>
+      </ls.PopUpControl>
+    </ls.PopUpContainer>
   );
 }
 
 export function OutputResultSummary({ignoredGroups, groups, basicCards, clozeCards}) {
   return (
-    <OutputResultTable>
+    <ls.OutputResultTable>
       <thead>
         <tr>
           <th></th>
@@ -41,6 +42,24 @@ export function OutputResultSummary({ignoredGroups, groups, basicCards, clozeCar
           <td>{ignoredGroups.length}</td>
         </tr>
       </tbody>
-    </OutputResultTable>
+    </ls.OutputResultTable>
+  );
+}
+
+export function ErrorBar({children}) {
+  const [visible] = useTouchAndHide(2000, children);
+  return (
+    <ls.ErrorBarDiv visible={visible}>
+      {children}
+    </ls.ErrorBarDiv>
+  );
+}
+
+export function MessageBar({children}) {
+  const [visible] = useTouchAndHide(2000, children);
+  return (
+    <ls.MessageBarDiv visible={visible}>
+      {children}
+    </ls.MessageBarDiv>
   );
 }

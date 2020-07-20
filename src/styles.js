@@ -1,4 +1,4 @@
-import styled, { createGlobalStyle, keyframes } from 'styled-components';
+import styled, { createGlobalStyle  } from 'styled-components';
 
 export const GlobalStyle = createGlobalStyle`
   body {
@@ -33,60 +33,6 @@ export const Container = styled.section`
   margin-left:  auto;
   width: 500px;
   max-width: 960px  
-`;
-
-const leftRight = keyframes`
-  40% {
-    transform: translate(50px, 0) scale(.7);
-    opacity: 1;
-    color: #348c04;
-  }
-
-  60% {
-    color: #0f40ba;
-  }
-
-  80% {
-    transform: translate(0) scale(2);
-    opacity: 0;
-  }
-  
-  100% {
-    transform: translate(0) scale(1);
-    opacity: 1;
-	}
-`;
-
-export const ErrorBar = styled.div`
-  background: #ffcccc;
-  color: black;
-  padding: 5px;
-  text-align: center;
-  width: auto;
-  margin-right: auto;
-  margin-left:  auto;
-  max-width: 300px;
-  border-radius: 5px;
-  font-size: 10px;
-
-  transform: translate(-50px, 0) scale(.3);
-  animation: ${leftRight} .5s forwards;
-`;
-
-export const MessageBar = styled.div`
-  background: #abd5ea;
-  color: black;
-  padding: 5px;
-  text-align: center;
-  width: auto;
-  max-width: 300px;
-  margin-right: auto;
-  margin-left:  auto;
-  border-radius: 5px;
-  font-size: 10px;
-
-  transform: translate(-50px, 0) scale(.3);
-  animation: ${leftRight} .5s forwards;   
 `;
 
 export const UploaderWrapper = styled.span`

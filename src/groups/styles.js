@@ -1,28 +1,8 @@
 import styled from 'styled-components';
 import cardsPNG from '../cards.png';
-import {NavigateNext, NavigateBefore, FirstPage, LastPage, Close} from '@styled-icons/material';
+import {Close} from '@styled-icons/material';
 
 export const CloseIcon = styled(Close)`
-  color: black;
-  width: 15px;
-`;
-
-export const FirstPageIcon = styled(FirstPage)`
-  color: black;
-  width: 15px;
-`;
-
-export const LastPageIcon = styled(LastPage)`
-  color: black;
-  width: 15px;
-`;
-
-export const PreviousPageIcon = styled(NavigateBefore)`
-  color: black;
-  width: 15px;
-`;
-
-export const NextPageIcon = styled(NavigateNext)`
   color: black;
   width: 15px;
 `;
@@ -46,17 +26,6 @@ export const GroupsHeading = styled.h2`
   border-radius: 5px;
   display: flex;
   justify-content: space-between;
-`;
-
-export const GroupsControl = styled.div`
-  background-color: rgb(200, 200, 200, 0.5);
-  color: #333;
-  font-size: 12px;
-  line-height: 30px;
-  margin: 10px;
-  border-radius: 5px;
-  display: flex;
-  justify-content: space-evenly;
 `;
 
 export const GroupsHeadingText = styled.span`
@@ -92,15 +61,6 @@ export const GroupCount = styled.div`
 export const GroupNewDiv = styled.div`
   font-size: 10px;
   color: red;
-`;
-
-export const GroupPageSpan = styled.span`
-  display: flex;
-`;
-
-export const GroupPageProgress = styled.progress`
-  margin: 5px;
-  height: 20px;
 `;
 
 export const GroupItem = styled.div`

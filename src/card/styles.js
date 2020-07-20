@@ -31,6 +31,7 @@ export const CardContainer = styled.div`
   margin-right: auto;
   margin-left:  auto;
   width: 500px;
+  height: 350px;
   max-width: 960px;
 `;
 
@@ -88,6 +89,8 @@ export const TagsContainer = styled.div`
   max-width: 800px;
   padding-left: 20px;
   display: flex;
+  position: relative;
+  top: 50px;
 `;
 
 export const TagsHeading = styled.h4`
@@ -124,7 +127,7 @@ export const FlashCard = styled.div`
 
 export const FlashCardContent = styled.div`
   padding: 5px;
-  min-height: 100px;
+  min-height: 150px;
   user-select: none;
 `;
 
