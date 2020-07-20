@@ -23,6 +23,8 @@ export default function Groups({fileName, groupsPerPage=12, onClose, onSelectGro
   const {onMessage, onError} = useContext(MessageAndErrorContext);
 
   useEffect(() => {
+    const abortController = new AbortController();
+
     const getGroups = async () => {
       try {
         const groups = await groupsService(fileName);
@@ -32,6 +34,9 @@ export default function Groups({fileName, groupsPerPage=12, onClose, onSelectGro
       }
     };
     getGroups();
+
+    return () => abortController.abort();
+    
   }, [fileName, onError]);
 
   useMessageAndError(state, onMessage, onError);

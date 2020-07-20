@@ -1,8 +1,8 @@
 # TODO
-* [important] card parse performance
-* [urgent] clear files/upload when opening card page cause error
+* [important] unit test
 * [important] adapt typescript
-* child component invoke callback from parent component and update itself at the same time
+* output files selection issue
+* output result dialog layout issue
  
 # Component Design
 

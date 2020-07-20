@@ -1,6 +1,6 @@
 import React, {useReducer, useState, useContext} from 'react';
 import * as st from './styles';
-import { parseBasic, parseCloze, parseTags } from './card-utils';
+import { parseTags } from './card-utils';
 import * as store from './card-store';
 import {useMessageAndError, MessageAndErrorContext} from '../utils/error-message';
 
@@ -37,12 +37,19 @@ function SourceCard({card}) {
   );
 }
 
-function BasicCard({card}) {
+const isSameCard = (props1, props2) => {
+  const card1 = props1.card,
+        card2 = props2.card;
+
+  return card1.error === card2.error && 
+    card1.question === card2.question && 
+    card1.answer === card2.answer;
+}
+
+const BasicCard = React.memo(({card: {error, question, answer}}) => {
   const [state, setState] = useState('question');
-  const [error, result] = parseBasic(card);
   if (error) return <st.FlashCardError>{error}</st.FlashCardError>
 
-  const [question, answer] = result;
   const handleClick = () => setState(store.getNextState(state));
   return (
     <>
@@ -56,14 +63,12 @@ function BasicCard({card}) {
       </st.FlashCard>
     </>
   );
-}
+}, isSameCard);
 
-function ClozeCard({card}) {
+const ClozeCard = React.memo(({card: {error, question, answer}}) => {
   const [state, setState] = useState('question');
-  const [error, result] = parseCloze(card);
   if (error) return <st.FlashCardError>{error}</st.FlashCardError>
 
-  const [question, answer] = result;
   const handleClick = () => setState(store.getNextState(state));
   return (
     <>
@@ -77,11 +82,11 @@ function ClozeCard({card}) {
       </st.FlashCard>
     </>
   );
-}
+}, isSameCard);
 
 export default function Card({card}) {
 
-  const {forCloze, forBasic, tags, cloze, basic, source} = card;
+  const {forCloze, forBasic, tags, clozeData: cloze, basicData: basic, source} = card;
 
   const [state, dispatcher] = useReducer(store.cardReducer(card), store.initState);
 

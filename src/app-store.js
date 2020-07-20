@@ -1,3 +1,5 @@
+import { parseBasic, parseCloze } from './card/card-utils';
+
 export const SET_FILES = 'SET_FILES';
 export const SET_MESSAGE = 'SET_MESSAGE';
 export const SET_ERROR = 'SET_ERROR';
@@ -10,6 +12,7 @@ export const UNCHECK_FILE = 'UNCHECK_FILE';
 export const UNCHECK_ALL_FILE = 'UNCHECK_ALL_FILE';
 export const SET_OUTPUT_RESULT = 'SET_OUTPUT_RESULT';
 export const CLEAR_OUTPUT_RESULT = 'CLEAR_OUTPUT_RESULT';
+export const CLEAR_ALL_FILES = 'CLEAR_ALL_FILES';
 
 export const initState = {
   message: null, 
@@ -20,6 +23,41 @@ export const initState = {
   checkedFiles: [],
   outputResult: null,
 };
+
+function convertGroup(group) {
+  if (!group || !group.previewCards) return group;
+
+  group.previewCards.forEach(c => convertCard(c));
+  return group;
+}
+
+function convertCard(card) {
+  if (!card || card.error) return card;
+
+  if (!card.clozeData && card.forCloze && card.cloze) {
+    const clozeData = {error: null};
+    const [error, result] = parseCloze(card.cloze);
+    if (error) clozeData.error = error;
+    else {
+      clozeData.question = result[0];
+      clozeData.answer = result[1];
+    }
+    card.clozeData = clozeData;
+  }
+
+  if (!card.basicData && card.forBasic && card.basic) {
+    const basicData = {error: null};
+    const [error, result] = parseBasic(card.basic);
+    if (error) basicData.error = error;
+    else {
+      basicData.question = result[0];
+      basicData.answer = result[1];
+    }
+    card.basicData = basicData;
+  }
+
+  return card;
+}
 
 export function appReducer(st, action) {
   switch (action.type) {
@@ -38,8 +76,11 @@ export function appReducer(st, action) {
     case UNSELECT_FILE: {
       return {...st, selectedFile: null};
     }
+    case CLEAR_ALL_FILES: {
+      return {...st, selectedFile: null, selectedGroup: null, checkedFiles: [], files: [], message: 'Files cleared'};
+    }
     case SELECT_GROUP: {
-      return {...st, selectedGroup: action.payload};
+      return {...st, selectedGroup: convertGroup(action.payload)};
     }
     case UNSELECT_GROUP: {
       return {...st, selectedGroup: null};

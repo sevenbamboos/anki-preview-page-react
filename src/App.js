@@ -19,6 +19,7 @@ function App() {
   const [state, dispatcher] = useReducer(store.appReducer, store.initState);
 
   useEffect(() => {
+    const abortController = new AbortController();
     const getFiles = async () => {
       try {
         const files = await filesService();
@@ -28,16 +29,16 @@ function App() {
       }
     };
     getFiles();
+
+    return () => abortController.abort();
+
   }, [filesChanged]);
 
   const clearFiles = useCallback(async () => {
     try {
       await clearService();
-      dispatcher({type: store.SET_MESSAGE, payload: 'Files cleared'});
-      dispatcher({type: store.UNSELECT_GROUP}); 
-      dispatcher({type: store.UNSELECT_FILE}); 
-      dispatcher({type: store.UNCHECK_ALL_FILE}); 
       setFilesChanged();
+      dispatcher({type: store.CLEAR_ALL_FILES});
     } catch (err) {
       dispatcher({type: store.SET_ERROR, payload: err});
     }
@@ -106,7 +107,9 @@ function App() {
   }, []);
 
   useEffect(() => {
+    const abortController = new AbortController();
     clearFiles();
+    return () => abortController.abort();
   }, [clearFiles]);
 
   let outputResultPop = null;
@@ -130,7 +133,7 @@ function App() {
   let contents = <Splitter />;
   if (state.selectedGroup) {
     contents = 
-    <Cards group={state.selectedGroup} onClose={onUnSelectGroup} />
+    <Cards group={state.selectedGroup} onClose={onUnSelectGroup} />;
 
   } else if (state.selectedFile) {
     contents = 
