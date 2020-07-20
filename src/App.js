@@ -11,6 +11,7 @@ import Groups from './groups';
 import Cards from './cards';
 import * as store from './app-store';
 import {version} from '../package.json';
+import {MessageAndErrorContext} from './utils/error-message';
 
 function App() {
 
@@ -68,7 +69,6 @@ function App() {
     }
   }, [setFilesChanged]);
 
-  //TODO put error and message into context provider
   const onError = useCallback((err) => {
     dispatcher({type: store.SET_ERROR, payload: err});
   }, []);
@@ -130,20 +130,11 @@ function App() {
   let contents = <Splitter />;
   if (state.selectedGroup) {
     contents = 
-    <Cards
-      group={state.selectedGroup}
-      onError={onError}
-      onMessage={onMessage}
-      onClose={onUnSelectGroup} />
+    <Cards group={state.selectedGroup} onClose={onUnSelectGroup} />
 
   } else if (state.selectedFile) {
     contents = 
-    <Groups 
-      fileName={state.selectedFile} 
-      onError={onError} 
-      onMessage={onMessage} 
-      onClose={onUnSelectFile} 
-      onSelectGroup={onSelectGroup} />;
+    <Groups fileName={state.selectedFile} onClose={onUnSelectFile} onSelectGroup={onSelectGroup} />;
 
   } else if (state.files.length > 0) {
     contents = 
@@ -160,20 +151,20 @@ function App() {
       <Container>
         {topBar}
         <Title>Anki Previewer</Title>
-        <Toolbar>
-          <UploaderWrapper>
-            <Uploader 
-              doUpload={doUpload} 
-              onMessage={onMessage} 
-              onError={onError} 
-            />
-          </UploaderWrapper>
-          <FilesBtn files={state.files} />
-          <ClearBtn onClear={clearFiles} fileCount={state.files.length} />
-          <OutputBtn onOutput={() => output(state.checkedFiles)} />
-        </Toolbar>
+        <MessageAndErrorContext.Provider value={{onMessage, onError}}>
 
-        { contents }
+          <Toolbar>
+            <UploaderWrapper>
+              <Uploader doUpload={doUpload} />
+            </UploaderWrapper>
+            <FilesBtn files={state.files} />
+            <ClearBtn onClear={clearFiles} fileCount={state.files.length} />
+            <OutputBtn onOutput={() => output(state.checkedFiles)} />
+          </Toolbar>
+
+          { contents }
+
+        </MessageAndErrorContext.Provider>
 
       </Container>
       {outputResultPop}

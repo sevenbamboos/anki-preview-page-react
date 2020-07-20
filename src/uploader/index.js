@@ -1,10 +1,12 @@
 
-import React, {useState, useCallback, useEffect} from 'react';
+import React, {useState, useCallback, useEffect, useContext} from 'react';
 import {LoadingIndicator, FileInput} from './styles';
+import {MessageAndErrorContext} from '../utils/error-message';
 
-function Uploader({doUpload, onMessage, onError}) {
+function Uploader({doUpload}) {
   const [file, setFile] = useState(null);
   const [isUploading, setUploading] = useState(false);
+  const {onMessage, onError} = useContext(MessageAndErrorContext);
 
   const onUpload = useCallback(async () => {
     if (!file) return;

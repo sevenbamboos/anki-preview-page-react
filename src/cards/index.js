@@ -1,14 +1,15 @@
-import React, {useReducer} from 'react';
+import React, {useReducer, useContext} from 'react';
 import * as st from './styles';
 import {GroupNewIndicator} from '../groups';
 import Card from '../card';
 import * as store from './cards-store';
-import {useMessageAndError} from '../utils/error-message';
+import {useMessageAndError, MessageAndErrorContext} from '../utils/error-message';
 import Paginator from '../utils/paginator';
 
-export default function Cards({group: {name, new: isNew, previewCards: cards}, onError, onMessage, onClose}) {
+export default function Cards({group: {name, new: isNew, previewCards: cards}, onClose}) {
 
   const [state, dispatcher] = useReducer(store.cardsReducer(cards), {...store.initState, card: cards[0]});
+  const {onMessage, onError} = useContext(MessageAndErrorContext);
 
   useMessageAndError(state, onMessage, onError);
 
@@ -36,7 +37,7 @@ export default function Cards({group: {name, new: isNew, previewCards: cards}, o
 
       <st.CardItem>
         {state.card ? (
-          <Card card={state.card} onError={onError} onMessage={onMessage}/>
+          <Card card={state.card} />
         ) : (
           <span>No Cards</span>
         )}

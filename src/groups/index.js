@@ -1,8 +1,8 @@
-import React, {useReducer, useEffect} from 'react';
+import React, {useReducer, useEffect, useContext} from 'react';
 import {groups as groupsService} from '../service';
 import * as ls from './styles';
 import * as store from './groups-store.js';
-import {useMessageAndError} from '../utils/error-message';
+import {useMessageAndError, MessageAndErrorContext} from '../utils/error-message';
 import Paginator from '../utils/paginator';
 
 export function GroupNewIndicator({isNew}) {
@@ -17,9 +17,10 @@ export function GroupNewIndicator({isNew}) {
   );
 }
 
-export default function Groups({fileName, groupsPerPage=12, onError, onMessage, onClose, onSelectGroup}){
+export default function Groups({fileName, groupsPerPage=12, onClose, onSelectGroup}){
 
   const [state, dispatcher] = useReducer(store.groupsReducer(groupsPerPage), store.initState);
+  const {onMessage, onError} = useContext(MessageAndErrorContext);
 
   useEffect(() => {
     const getGroups = async () => {

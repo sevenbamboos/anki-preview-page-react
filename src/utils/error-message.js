@@ -1,4 +1,4 @@
-import {useEffect} from 'react';
+import React, {useEffect} from 'react';
 
 export function setErrorState(state, error) {
   return {...state, message: null, error};
@@ -17,3 +17,5 @@ export function useMessageAndError(state, onMessage, onError) {
     if (state.error) onError(state.error);
   }, [state.error, onError]);  
 }
+
+export const MessageAndErrorContext = React.createContext(null);

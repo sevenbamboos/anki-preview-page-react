@@ -1,8 +1,8 @@
-import React, {useReducer, useState} from 'react';
+import React, {useReducer, useState, useContext} from 'react';
 import * as st from './styles';
 import { parseBasic, parseCloze, parseTags } from './card-utils';
 import * as store from './card-store';
-import {useMessageAndError} from '../utils/error-message';
+import {useMessageAndError, MessageAndErrorContext} from '../utils/error-message';
 
 function TabBtn({tabName, children, isActive, dispatcher}) {
   return (
@@ -79,11 +79,13 @@ function ClozeCard({card}) {
   );
 }
 
-export default function Card({card, onError, onMessage}) {
+export default function Card({card}) {
 
   const {forCloze, forBasic, tags, cloze, basic, source} = card;
 
   const [state, dispatcher] = useReducer(store.cardReducer(card), store.initState);
+
+  const {onMessage, onError} = useContext(MessageAndErrorContext);
 
   useMessageAndError(state, onMessage, onError);
 
