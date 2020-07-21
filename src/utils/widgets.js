@@ -26,7 +26,7 @@ export function OutputResultSummary({ignoredGroups, groups, basicCards, clozeCar
       </thead>
       <tbody>
         <tr>
-          <td>Groups</td>
+          <td>Group Names</td>
           <td>{groups.join(',')}</td>
         </tr>
         <tr>
@@ -38,7 +38,7 @@ export function OutputResultSummary({ignoredGroups, groups, basicCards, clozeCar
           <td>{clozeCards.length}</td>
         </tr>
         <tr>
-          <td>Ignored</td>
+          <td>Ignored Groups</td>
           <td>{ignoredGroups.length}</td>
         </tr>
       </tbody>
