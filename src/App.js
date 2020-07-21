@@ -37,8 +37,8 @@ function App() {
   const clearFiles = useCallback(async () => {
     try {
       await clearService();
-      setFilesChanged();
       dispatcher({type: store.CLEAR_ALL_FILES});
+      setFilesChanged();
     } catch (err) {
       dispatcher({type: store.SET_ERROR, payload: err});
     }
@@ -53,7 +53,6 @@ function App() {
     try {
       const result = await outputsService(fileNames);
       dispatcher({type: store.SET_OUTPUT_RESULT, payload: result});
-      dispatcher({type: store.UNCHECK_ALL_FILE});
     } catch (err) {
       dispatcher({type: store.SET_ERROR, payload: err.message});
     }
@@ -62,8 +61,7 @@ function App() {
   const doUpload = useCallback(async (file) => {
     try {
       await uploadService(file);
-      dispatcher({type: store.UNSELECT_GROUP}); 
-      dispatcher({type: store.UNSELECT_FILE}); 
+      dispatcher({type: store.AFTER_UPLOAD}); 
       setFilesChanged();
     } catch (err) {
       throw err;
@@ -168,9 +166,9 @@ function App() {
           { contents }
 
         </MessageAndErrorContext.Provider>
-
+        {outputResultPop}
       </Container>
-      {outputResultPop}
+      
     </>
   );
 }

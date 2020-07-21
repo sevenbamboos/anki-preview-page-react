@@ -13,6 +13,7 @@ export const UNCHECK_ALL_FILE = 'UNCHECK_ALL_FILE';
 export const SET_OUTPUT_RESULT = 'SET_OUTPUT_RESULT';
 export const CLEAR_OUTPUT_RESULT = 'CLEAR_OUTPUT_RESULT';
 export const CLEAR_ALL_FILES = 'CLEAR_ALL_FILES';
+export const AFTER_UPLOAD = 'AFTER_UPLOAD';
 
 export const initState = {
   message: null, 
@@ -59,6 +60,12 @@ function convertCard(card) {
   return card;
 }
 
+function fileChecked(file, files) {
+  if (!file || !files) return [false, -1];
+  const foundIndex = files.findIndex(f => f === file);
+  return [foundIndex !== -1, foundIndex]
+}
+
 export function appReducer(st, action) {
   switch (action.type) {
     case SET_MESSAGE: {
@@ -68,7 +75,11 @@ export function appReducer(st, action) {
       return {...st, message: null, error: action.payload};
     }
     case SET_FILES: {
-      return {...st, files: action.payload};
+      const files = action.payload;
+      return {...st, files, checkedFiles: files, selectedFile: files.length === 1 ? files[0] : null, selectedGroup: null};
+    }
+    case AFTER_UPLOAD: {
+      return {...st, selectedFile: null, selectedGroup: null, message: 'File Uploaded'};
     }
     case SELECT_FILE: {
       return {...st, selectedFile: action.payload};
@@ -77,7 +88,7 @@ export function appReducer(st, action) {
       return {...st, selectedFile: null};
     }
     case CLEAR_ALL_FILES: {
-      return {...st, selectedFile: null, selectedGroup: null, checkedFiles: [], files: [], message: 'Files cleared'};
+      return {...st, selectedFile: null, selectedGroup: null, checkedFiles: [], /*files: [],*/ message: 'Files cleared'};
     }
     case SELECT_GROUP: {
       return {...st, selectedGroup: convertGroup(action.payload)};
@@ -88,8 +99,7 @@ export function appReducer(st, action) {
     case CHECK_FILE: {
       const file = action.payload;
       const checkedFiles = st.checkedFiles;
-      const foundIndex = checkedFiles.findIndex((x) => x === file);
-      if (foundIndex !== -1) {
+      if (fileChecked(file, checkedFiles)[0]) {
         return st;
       } else {
         return {...st, checkedFiles: [...checkedFiles, file]};
@@ -98,19 +108,22 @@ export function appReducer(st, action) {
     case UNCHECK_FILE: {
       const file = action.payload;
       const checkedFiles = st.checkedFiles;
-      const foundIndex = checkedFiles.findIndex((x) => x === file);
-      if (foundIndex !== -1) {
+      const [found, foundIndex] = fileChecked(file, checkedFiles);
+      if (!found) {
         return st;
       } else {
-        const newCheckedFiles = [...checkedFiles].splice(foundIndex, 1);
-        return {...st, checkedFiles: [...newCheckedFiles]};
+        const newCheckedFiles = [];
+        for (let i = 0; i < checkedFiles.length; i++) {
+          if (i !== foundIndex) newCheckedFiles.push(checkedFiles[i]);
+        }
+        return {...st, checkedFiles: newCheckedFiles};
       }
     }
     case UNCHECK_ALL_FILE: {
         return {...st, checkedFiles: []};
     }
     case SET_OUTPUT_RESULT: {
-        return {...st, outputResult: action.payload};
+        return {...st, outputResult: action.payload, selectedGroup: null, selectedFile: null};
     }
     case CLEAR_OUTPUT_RESULT: {
         return {...st, outputResult: null};

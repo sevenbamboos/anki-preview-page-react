@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { FilesContainer, FilesHeading, FileList, FileItem, FileItemLink, FileItemCheck } from './styles';
 
 export const Files = ({children}) => {
@@ -14,8 +14,11 @@ export const Files = ({children}) => {
 
 export const File = ({file, onSelect, onCheck}) => {
 
+  const [selected, setSelected] = useState(true);
+
   const handleCheck = (e) => {
-    onCheck({checked: e.target.value, value: file});
+    setSelected(e.target.checked ? true : false);
+    onCheck({checked: e.target.checked, value: file});
   };
 
   return (
@@ -23,7 +26,7 @@ export const File = ({file, onSelect, onCheck}) => {
       <FileItemLink onClick={() => onSelect(file)}>
       {file}
       </FileItemLink>
-      <FileItemCheck type="checkbox" value="checked" onClick={handleCheck} />
+      <FileItemCheck type="checkbox" checked={selected} onChange={handleCheck} />
     </FileItem>
   );
 };

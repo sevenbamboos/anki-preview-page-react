@@ -24,12 +24,12 @@ export const NextPageIcon = styled(NavigateNext)`
 export const PopUpContainer = styled.div`
   display: ${props => props.show ? 'block' : 'none'};
   position: absolute;
-  left: ${props=> props.left ? props.left : '450px'};
-  top: ${props=> props.top ? props.top : '250px'};
+  left: ${props=> props.left ? props.left : '50px'};
+  top: ${props=> props.top ? props.top : '100px'};
   width: ${props=> props.width ? props.width : '300px'};
   height: ${props=> props.height ? props.height : '200px'};
-  padding: 20px;
-  background-color: rgb(200, 200, 200, 0.5);
+  padding: 150px 120px 20px 120px;
+  background-color: rgb(200, 200, 200, 0.7);
   z-index: 200;
   font-size: 12px;
   border-radius: 5px;
@@ -38,7 +38,7 @@ export const PopUpContainer = styled.div`
 export const PopUpControl = styled.div`
   position: absolute;
   bottom 20px;
-  width: 90%;
+  width: 50%;
   display: flex;
   justify-content: space-evenly;
 `;

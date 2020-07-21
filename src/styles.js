@@ -32,7 +32,8 @@ export const Container = styled.section`
   margin-right: auto;
   margin-left:  auto;
   width: 500px;
-  max-width: 960px  
+  max-width: 960px;
+  position: absolute;
 `;
 
 export const UploaderWrapper = styled.span`
