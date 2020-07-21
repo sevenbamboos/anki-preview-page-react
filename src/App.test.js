@@ -1,9 +1,16 @@
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import App from './App';
 
-test('renders learn react link', () => {
-  const { getByText } = render(<App />);
-  const linkElement = getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+describe('App', () => {
+  test('check test env', () => {
+    expect(1+1).toBe(2);
+  });
+
+  test('render basic check', () => {
+    render(<App />);
+    expect(screen.getByRole('heading')).toHaveTextContent('Anki Previewer');
+    expect(screen.getByTitle('Clear')).toBeInTheDocument();
+    expect(screen.getByTitle('Output')).toBeInTheDocument();
+  });
 });
