@@ -37,10 +37,6 @@ export function OutputResultSummary({ignoredGroups, groups, basicCards, clozeCar
           <td>Cloze Cards</td>
           <td>{clozeCards.length}</td>
         </tr>
-        <tr>
-          <td>Ignored Groups</td>
-          <td>{ignoredGroups.length}</td>
-        </tr>
       </tbody>
     </ls.OutputResultTable>
   );

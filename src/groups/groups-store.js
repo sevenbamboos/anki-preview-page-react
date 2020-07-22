@@ -6,7 +6,7 @@ export const initState = {
   filteredGroups: [],
   groupsOnPage: [],
   page: 1,
-  showNewOnly: false, // TODO put it into local storage
+  showNewOnly: true, // TODO put it into local storage
   totalPage: 0,
   message: null,
   error: null,
