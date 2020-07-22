@@ -1,6 +1,6 @@
-import {useState, useEffect} from 'react';
+import {useState, useEffect, ReactNode} from 'react';
 
-function useTouchAndHide(duration, dependency) {
+function useTouchAndHide(duration: number, dependency: ReactNode) {
 
   const [visible, setVisible] = useState(true);
   useEffect(() => {

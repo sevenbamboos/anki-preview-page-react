@@ -1,8 +1,14 @@
-import React from 'react';
+import React, {ReactNode} from 'react';
 import * as ls from './styles';
 import useTouchAndHide from './touch-hide';
 
-export function InfoDialog({show, children, onClose}) {
+type InfoDialogProps = {
+  show: boolean,
+  children: ReactNode,
+  onClose: () => void
+};
+
+export function InfoDialog({show, children, onClose}: InfoDialogProps) {
   return (
     <ls.PopUpContainer 
       show={show}
@@ -15,7 +21,13 @@ export function InfoDialog({show, children, onClose}) {
   );
 }
 
-export function OutputResultSummary({ignoredGroups, groups, basicCards, clozeCards}) {
+type OutputResultSummaryProps = {
+  basicCards: string[],
+  clozeCards: string[],
+  groups: string[],
+};
+
+export function OutputResultSummary({groups, basicCards, clozeCards}: OutputResultSummaryProps) {
   return (
     <ls.OutputResultTable>
       <thead>
@@ -42,7 +54,11 @@ export function OutputResultSummary({ignoredGroups, groups, basicCards, clozeCar
   );
 }
 
-export function ErrorBar({children}) {
+type ErrorBarProps = {
+  children: ReactNode,
+};
+
+export function ErrorBar({children}: ErrorBarProps) {
   const [visible] = useTouchAndHide(2000, children);
   return (
     <ls.ErrorBarDiv visible={visible}>
@@ -51,7 +67,11 @@ export function ErrorBar({children}) {
   );
 }
 
-export function MessageBar({children}) {
+type MessageBarProps = {
+  children: ReactNode,
+};
+
+export function MessageBar({children}: MessageBarProps) {
   const [visible] = useTouchAndHide(2000, children);
   return (
     <ls.MessageBarDiv visible={visible}>

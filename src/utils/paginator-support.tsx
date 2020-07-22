@@ -1,8 +1,13 @@
-function getTotalPage(totalCount, itemsPerPage) {
+function getTotalPage(totalCount: number, itemsPerPage: number) {
   return Math.ceil(totalCount/itemsPerPage);
 }
 
-function getPage(totalCount, itemsPerPage, currentPage, wantedPage) {
+function getPage(
+  totalCount: number, 
+  itemsPerPage: number, 
+  currentPage: number, 
+  wantedPage: number) 
+  : [null|string, number] {
   if (wantedPage < 1) return ['No Previous Pages', currentPage];
 
   const totalPage = getTotalPage(totalCount, itemsPerPage);
@@ -11,7 +16,11 @@ function getPage(totalCount, itemsPerPage, currentPage, wantedPage) {
   return [null, wantedPage];
 }
 
-function getItemsOnPage(items, itemsPerPage, page) {
+function getItemsOnPage<T>(
+  items: T[], 
+  itemsPerPage: number, 
+  page: number) 
+  : [string, []] | [null, T[]] {
   let pageStart = itemsPerPage * (page-1);
   let pageEnd = pageStart + itemsPerPage;
 
@@ -24,14 +33,20 @@ function getItemsOnPage(items, itemsPerPage, page) {
   }
 }
 
-export function navigateToPage(
-  itemsPerPage, 
-  currentPageSupplier, 
-  itemsSupplier, 
-  pageFunc, 
-  messageSupplier,
-  errorConsumer,
-  successConsumer /* {message, page, currentItems} */
+type NavigateToPageSuccessResult<T> = {
+  message: string,
+  page: number,
+  currentItems: T[] 
+};
+
+export function navigateToPage<T>(
+  itemsPerPage: number, 
+  currentPageSupplier: () => number, 
+  itemsSupplier: () => T[], 
+  pageFunc: (x: number) => number, 
+  messageFunc: (x: number) => string,
+  errorConsumer: (e: string) => void,
+  successConsumer: (result: NavigateToPageSuccessResult<T>) => void
   ) {
 
   const currentPage = currentPageSupplier();
@@ -45,16 +60,27 @@ export function navigateToPage(
     if (errorForItems) {
       return errorConsumer(errorForItems);
     } else {
-      return successConsumer({message: messageSupplier(page), page, currentItems: itemsOnPage});
+      return successConsumer({message: messageFunc(page), page, currentItems: itemsOnPage});
     }
   }  
 }
 
-export function resetPage(
-  itemsSupplier, 
-  itemsPerPage,
-  errorConsumer, /* {error, items, currentItems, page, totalPage} */
-  successConsumer /* {items, currentItems, page, totalPage} */  
+type ResetPageSuccessResult<T> = {
+  items: T[],
+  currentItems: T[],
+  page: number,
+  totalPage: number
+};
+
+type ResetPageErrorResult<T> = ResetPageSuccessResult<T> & {
+  error: string
+};
+
+export function resetPage<T>(
+  itemsSupplier: () => T[], 
+  itemsPerPage: number,
+  errorConsumer: (error: ResetPageErrorResult<T>) => void,
+  successConsumer: (result: ResetPageSuccessResult<T>) => void
   ) {
 
   const items = itemsSupplier();
