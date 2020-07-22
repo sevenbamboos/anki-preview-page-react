@@ -1,5 +1,10 @@
 import React, {useEffect} from 'react';
 
+export type MessageErrorType = {
+  message: string | null,
+  error: string | null
+};
+
 // TODO how to avoid using any for a function used by multiple components with different types of state?
 
 export function setErrorState(state: any, error: string) {

@@ -131,14 +131,17 @@ export const FlashCardContent = styled.div`
   user-select: none;
 `;
 
-export const FlashCardTitle = styled.div`
+export const FlashCardPlain = styled.div`
   padding: 5px;
   float: right;
   font-size: 12px;
+  user-select: none;
+`;
 
-  &:before{
+export const FlashCardTitle = styled(FlashCardPlain)`
+  &:after{
     content: 'Click to switch';
-    margin-right: .5em;
+    margin-left: .5em;
     text-decoration: underline;
     cursor: pointer;
   }   

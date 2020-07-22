@@ -1,5 +1,6 @@
 
-export function parseBasic(card) {
+export function parseBasic(card: string) 
+  : [string, []] | [null, string[]] {
   if (!card) return ['No Contents', []];
 
   const rst = card.split('|');
@@ -10,35 +11,42 @@ export function parseBasic(card) {
   }
 }
 
-export function parseTags(tags) {
+export function parseTags(tags: string) {
   if (!tags) return [];
   return tags.split(' ');
 }
 
-function Token(value, isFilling) {
-  this.isFilling = isFilling;
-  if (isFilling) {
-    const [fillingName, fillingValue] = value.split('::');
-    this.fillingName = fillingName;
-    this.value = fillingValue;
-  } else {
-    this.value = value;
+class Token {
+  value: string;
+  isFilling: boolean;
+  fillingName?: string;
+
+  constructor(value: string, isFilling: boolean) {
+    this.isFilling = isFilling;
+    if (isFilling) {
+      const [fillingName, fillingValue] = value.split('::');
+      this.fillingName = fillingName;
+      this.value = fillingValue;
+    } else {
+      this.value = value;
+    }    
   }
 
-  this.fmtQuestion = function() {
+  fmtQuestion() {
     if (this.isFilling) {
       return this.value.split('').map(c => '_').join('');
     } else {
       return this.value;
     }
-  };
+  };  
 }
 
-export function parseCloze(card) {
+export function parseCloze(card: string)
+  : [string, []] | [null, [string, string]] {
   if (!card) return ['No Contents', []];
 
   const tokens = [];
-  const rangeSymbol = (insideFilling) => insideFilling ? '}}' : '{{';
+  const rangeSymbol = (insideFilling:boolean) => insideFilling ? '}}' : '{{';
 
   let index = 0;
   let insideFilling = false;
