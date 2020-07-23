@@ -27,4 +27,4 @@ export function useMessageAndError(state: any, onMessage: StringConsumer, onErro
   }, [state.error, onError]);  
 }
 
-export const MessageAndErrorContext = React.createContext({onMessage: ()=>{}, onError: ()=>{}});
+export const MessageAndErrorContext = React.createContext({onMessage: (_msg: string)=>{}, onError: (_err: string)=>{}});
