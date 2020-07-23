@@ -1,8 +1,13 @@
-function getTotalPage(totalCount, itemsPerPage) {
+function getTotalPage(totalCount: number, itemsPerPage: number) {
   return Math.ceil(totalCount/itemsPerPage);
 }
 
-function getPage(totalCount, itemsPerPage, currentPage, wantedPage) {
+function getPage(
+  totalCount: number, 
+  itemsPerPage: number, 
+  currentPage: number, 
+  wantedPage: number) 
+  : [null|string, number] {
   if (wantedPage < 1) return ['No Previous Pages', currentPage];
 
   const totalPage = getTotalPage(totalCount, itemsPerPage);
@@ -11,7 +16,11 @@ function getPage(totalCount, itemsPerPage, currentPage, wantedPage) {
   return [null, wantedPage];
 }
 
-function getItemsOnPage(items, itemsPerPage, page) {
+function getItemsOnPage<T>(
+  items: T[], 
+  itemsPerPage: number, 
+  page: number) 
+  : [string, []] | [null, T[]] {
   let pageStart = itemsPerPage * (page-1);
   let pageEnd = pageStart + itemsPerPage;
 
@@ -24,15 +33,21 @@ function getItemsOnPage(items, itemsPerPage, page) {
   }
 }
 
-export function navigateToPage(
-  itemsPerPage, 
-  currentPageSupplier, 
-  itemsSupplier, 
-  pageFunc, 
-  messageSupplier,
-  errorConsumer,
-  successConsumer /* {message, page, currentItems} */
-  ) {
+export type NavigateToPageSuccessResult<T,K> = {
+  message: string,
+  page: number,
+  currentItems: T[] 
+};
+
+export function navigateToPage<T,K>(
+  itemsPerPage: number, 
+  currentPageSupplier: () => number, 
+  itemsSupplier: () => T[], 
+  pageFunc: (x: number) => number, 
+  messageFunc: (x: number) => string,
+  errorConsumer: (e: string) => K,
+  successConsumer: (result: NavigateToPageSuccessResult<T,K>) => K
+  ) : K {
 
   const currentPage = currentPageSupplier();
   const wantedPage = pageFunc(currentPage);
@@ -45,17 +60,28 @@ export function navigateToPage(
     if (errorForItems) {
       return errorConsumer(errorForItems);
     } else {
-      return successConsumer({message: messageSupplier(page), page, currentItems: itemsOnPage});
+      return successConsumer({message: messageFunc(page), page, currentItems: itemsOnPage});
     }
   }  
 }
 
-export function resetPage(
-  itemsSupplier, 
-  itemsPerPage,
-  errorConsumer, /* {error, items, currentItems, page, totalPage} */
-  successConsumer /* {items, currentItems, page, totalPage} */  
-  ) {
+export type ResetPageSuccessResult<T, K> = {
+  items: T[],
+  currentItems: T[],
+  page: number,
+  totalPage: number
+};
+
+export type ResetPageErrorResult<T, K> = ResetPageSuccessResult<T, K> & {
+  error: string
+};
+
+export function resetPage<T, K>(
+  itemsSupplier: () => T[], 
+  itemsPerPage: number,
+  errorConsumer: (error: ResetPageErrorResult<T, K>) => K,
+  successConsumer: (result: ResetPageSuccessResult<T, K>) => K
+  ) : K {
 
   const items = itemsSupplier();
   const page = 1 // reset to the first page;

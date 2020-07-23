@@ -3,8 +3,14 @@ import React, {useState, useCallback, useEffect, useContext} from 'react';
 import {LoadingIndicator, FileInput} from './styles';
 import {MessageAndErrorContext} from '../utils/error-message';
 
-function Uploader({doUpload}) {
-  const [file, setFile] = useState(null);
+type UploaderProps = {
+  doUpload: (file: File) => Promise<void>;
+};
+
+type UploaderFile = File | null;
+
+function Uploader({doUpload}: UploaderProps) {
+  const [file, setFile] = useState<UploaderFile>(null);
   const [isUploading, setUploading] = useState(false);
   const {onMessage, onError} = useContext(MessageAndErrorContext);
 
@@ -27,8 +33,10 @@ function Uploader({doUpload}) {
     onUpload();
   }, [onUpload]);
 
-  const selectFile = (event) => {
-    setFile(event.target.files[0]);
+  const selectFile = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target && event.target.files) {
+      setFile(event.target.files[0]);
+    }
   };
 
   return (

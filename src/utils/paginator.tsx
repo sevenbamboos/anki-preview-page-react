@@ -1,7 +1,18 @@
 import React from 'react';
 import * as ls from './styles';
 
-export default function Paginator({pageIndex, totalPage, onFirst, onPrev, onNext, onLast}) {
+type PaginatorCallback = () => void;
+
+type PaginatorProps = {
+  pageIndex: number,
+  totalPage: number,
+  onFirst: PaginatorCallback,
+  onPrev: PaginatorCallback,
+  onNext: PaginatorCallback,
+  onLast: PaginatorCallback,
+};
+
+export default function Paginator({pageIndex, totalPage, onFirst, onPrev, onNext, onLast}: PaginatorProps) {
 
   return (
     <ls.PaginatorControl>

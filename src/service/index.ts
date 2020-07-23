@@ -1,6 +1,7 @@
 import http from './http-common';
+import { GroupData, OutputResult } from '../types';
 
-export const groups = async (fileName) => {
+export const groups = async (fileName: string): Promise<GroupData[]> => {
   return http.get('/groups', { params: {fileName} })
     .then(x => x.data)
     .catch(err => {
@@ -8,7 +9,7 @@ export const groups = async (fileName) => {
     });
 };
 
-export const outputs = async (fileNames) => {
+export const outputs = async (fileNames: string[]): Promise<OutputResult> => {
   return http.post('/outputs', { files: fileNames, question: '' })
     .then(x => x.data)
     .catch(err => {
@@ -16,7 +17,7 @@ export const outputs = async (fileNames) => {
     });
 };
 
-export const files = async () => {
+export const files = async (): Promise<string[]> => {
   return http.get('/files')
     .then(x => x.data)
     .catch(err => { throw err;})
@@ -28,7 +29,7 @@ export const clear = async () => {
     .catch(err => { throw err;})
 };
 
-export const upload = async (file) => {
+export const upload = async (file: File) => {
   const formData = new FormData();
   formData.append('file', file);
 

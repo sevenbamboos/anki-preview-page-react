@@ -5,8 +5,14 @@ import Card from '../card';
 import * as store from './cards-store';
 import {useMessageAndError, MessageAndErrorContext} from '../utils/error-message';
 import Paginator from '../utils/paginator';
+import {GroupData} from '../types';
 
-export default function Cards({group: {name, new: isNew, previewCards: cards}, onClose}) {
+type CardsProps = {
+  group: GroupData,
+  onClose: () => void
+};
+
+export default function Cards({group: {name, new: isNew, previewCards: cards}, onClose}: CardsProps) {
 
   const [state, dispatcher] = useReducer(store.cardsReducer(cards), {...store.initState, card: cards[0]});
   const {onMessage, onError} = useContext(MessageAndErrorContext);

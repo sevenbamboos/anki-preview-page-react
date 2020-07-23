@@ -1,10 +1,18 @@
-import React, {useReducer, useState, useContext} from 'react';
+import React, {useReducer, useState, useContext, ReactNode, Dispatch} from 'react';
 import * as st from './styles';
 import { parseTags } from './card-utils';
 import * as store from './card-store';
 import {useMessageAndError, MessageAndErrorContext} from '../utils/error-message';
+import { CardData, EQA } from '../types';
 
-function TabBtn({tabName, children, isActive, dispatcher}) {
+type TabBtnProps = {
+  tabName: store.TAB_NAMES,
+  children: ReactNode,
+  isActive: boolean,
+  dispatcher: Dispatch<store.CardAction>
+};
+
+function TabBtn({tabName, children, isActive, dispatcher}: TabBtnProps) {
   return (
     <st.CardButton 
       isActive={isActive}
@@ -16,7 +24,13 @@ function TabBtn({tabName, children, isActive, dispatcher}) {
   );
 }
 
-function Tab({name, shouldDisplay, children}) {
+type TabProps = {
+  name: store.TAB_NAMES,
+  shouldDisplay: boolean,
+  children: ReactNode
+};
+
+function Tab({name, shouldDisplay, children}: TabProps) {
   return (
     <st.CardTab data-name={name} shouldDisplay={shouldDisplay}>
       {children}
@@ -24,40 +38,68 @@ function Tab({name, shouldDisplay, children}) {
   );
 }
 
-function SourceCard({card}) {
+type CardProps = {
+  card: CardData
+};
+
+type SourceCardProps = {
+  card: string
+};
+
+function SourceCard({card}: SourceCardProps) {
   if (!card) return <st.FlashCardError>No Contents</st.FlashCardError>
 
   return (
     <>
       <st.FlashCard show={true}>
         <st.FlashCardContent>{card}</st.FlashCardContent>
-        <st.FlashCardTitle>source</st.FlashCardTitle>
+        <st.FlashCardPlain>Source</st.FlashCardPlain>
       </st.FlashCard>
     </>
   );
 }
 
-const isSameCard = (props1, props2) => {
+const isSameCard = (props1: EQACardProps, props2: EQACardProps) => {
+
   const card1 = props1.card,
         card2 = props2.card;
 
-  return card1.error === card2.error && 
-    card1.question === card2.question && 
-    card1.answer === card2.answer;
+  if (!card1 && !card2) return true;
+  else if (!card1 || !card2) return false;
+
+  if (store.cardHasError(card1) && store.cardHasError(card2)) {
+    return card1.error === card2.error;
+  } else if (store.cardHasQA(card1) && store.cardHasQA(card2)) {
+    return card1.question === card2.question && 
+      card1.answer === card2.answer;
+  } else {
+    return false;
+  }
 }
 
-const BasicCard = React.memo(({card: {error, question, answer}}) => {
-  const [state, setState] = useState('question');
-  if (error) return <st.FlashCardError>{error}</st.FlashCardError>
+type EQACardProps = {
+  card: EQA | null
+};
 
-  const handleClick = () => setState(store.getNextState(state));
+const BasicCard = React.memo(({card}: EQACardProps) => {
+  const [status, setStatus] = useState('question');
+
+  if (!card) return null;
+
+  if (store.cardHasError(card)) {
+    return <st.FlashCardError>{card.error}</st.FlashCardError>
+  }
+
+  const {question, answer} = card;
+
+  const handleClick = () => setStatus(store.getNextCardStatus(status));
   return (
     <>
-      <st.FlashCard onClick={handleClick} show={state === 'question'}>
+      <st.FlashCard onClick={handleClick} show={status === 'question'}>
         <st.FlashCardContent>{question}</st.FlashCardContent>
         <st.FlashCardTitle>Question</st.FlashCardTitle>
       </st.FlashCard>
-      <st.FlashCard onClick={handleClick} show={state === 'answer'}>
+      <st.FlashCard onClick={handleClick} show={status === 'answer'}>
         <st.FlashCardContent>{answer}</st.FlashCardContent>
         <st.FlashCardTitle>Answer</st.FlashCardTitle>
       </st.FlashCard>
@@ -65,18 +107,25 @@ const BasicCard = React.memo(({card: {error, question, answer}}) => {
   );
 }, isSameCard);
 
-const ClozeCard = React.memo(({card: {error, question, answer}}) => {
-  const [state, setState] = useState('question');
-  if (error) return <st.FlashCardError>{error}</st.FlashCardError>
+const ClozeCard = React.memo(({card}: EQACardProps) => {
+  const [status, setStatus] = useState('question');
 
-  const handleClick = () => setState(store.getNextState(state));
+  if (!card) return null;
+
+  if (store.cardHasError(card)) {
+    return <st.FlashCardError>{card.error}</st.FlashCardError>
+  }
+
+  const {question, answer} = card;
+
+  const handleClick = () => setStatus(store.getNextCardStatus(status));
   return (
     <>
-      <st.FlashCard onClick={handleClick} show={state === 'question'}>
+      <st.FlashCard onClick={handleClick} show={status === 'question'}>
         <st.FlashCardContent>{question}</st.FlashCardContent>
         <st.FlashCardTitle>Question</st.FlashCardTitle>
       </st.FlashCard>
-      <st.FlashCard onClick={handleClick} show={state === 'answer'}>
+      <st.FlashCard onClick={handleClick} show={status === 'answer'}>
         <st.FlashCardContent>{answer}</st.FlashCardContent>
         <st.FlashCardTitle>Answer</st.FlashCardTitle>
       </st.FlashCard>
@@ -84,7 +133,7 @@ const ClozeCard = React.memo(({card: {error, question, answer}}) => {
   );
 }, isSameCard);
 
-export default function Card({card}) {
+export default function Card({card}: CardProps) {
 
   const {forCloze, forBasic, tags, clozeData: cloze, basicData: basic, source} = card;
 

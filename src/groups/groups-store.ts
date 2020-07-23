@@ -1,7 +1,18 @@
-import {setErrorState, setMessageState} from '../utils/error-message';
-import {navigateToPage, resetPage} from '../utils/paginator-support';
+import {setErrorState, setMessageState, MessageErrorType} from '../utils/error-message';
+import {navigateToPage, resetPage, NavigateToPageSuccessResult, ResetPageSuccessResult, ResetPageErrorResult} from '../utils/paginator-support';
+import {GroupData} from '../types';
 
-export const initState = {
+type GroupsState = MessageErrorType & {
+  groups: GroupData[],
+  selectedGroup: GroupData | null,
+  filteredGroups: GroupData[],
+  groupsOnPage: GroupData[],
+  page: number,
+  totalPage: number,
+  showNewOnly: boolean
+};
+
+export const initState: GroupsState = {
   groups: [],
   filteredGroups: [],
   groupsOnPage: [],
@@ -19,7 +30,7 @@ export const PREV_PAGE = 'PREV_PAGE';
 export const GOTO_PAGE = 'GOTO_PAGE';
 export const TOGGLE_SHOW_NEW = 'TOGGLE_SHOW_NEW';
 
-function getFilteredGroups(items, showNewOnly) {
+function getFilteredGroups(items: GroupData[], showNewOnly: boolean) {
   if (!showNewOnly) {
     return items;
   } else {
@@ -27,24 +38,34 @@ function getFilteredGroups(items, showNewOnly) {
   }
 }
 
-const onNavigateSuccess = (state) => 
-  ({message, page, currentItems: groupsOnPage}) => {
+const onNavigateSuccess = (state: GroupsState) => 
+  ({message, page, currentItems: groupsOnPage}: NavigateToPageSuccessResult<GroupData, GroupsState>) => {
     return {...setMessageState(state, message), page, groupsOnPage}; 
   };
 
-const itemsSupplier = (st) => () => getFilteredGroups(st.groups, st.showNewOnly);
+const itemsSupplier = (st: GroupsState) => () => getFilteredGroups(st.groups, st.showNewOnly);
 
-const onResetError = (st) => ({error, items, currentItems: groupsOnPage, page, totalPage}) => {
+const onResetError = (st: GroupsState) => ({error, items, currentItems: groupsOnPage, page, totalPage}: ResetPageErrorResult<GroupData, GroupsState>) => {
     return {...setErrorState(st, error), filteredGroups: items, groupsOnPage, page, totalPage};
   };
 
-const onResetSuccess = (st) => ({items, currentItems: groupsOnPage, page, totalPage}) => {
+const onResetSuccess = (st: GroupsState) => ({items, currentItems: groupsOnPage, page, totalPage}: ResetPageSuccessResult<GroupData, GroupsState>) => {
   return {...st, filteredGroups: items, groupsOnPage, page, totalPage};
 };
 
-export function groupsReducer(groupsPerPage) {
+type GroupsAction = {
+  type: typeof NEXT_PAGE | typeof PREV_PAGE | typeof TOGGLE_SHOW_NEW
+} | {
+  type: typeof GOTO_PAGE,
+  payload: number
+} | {
+  type: typeof SET_GROUPS,
+  payload: GroupData[]
+};
 
-  return function(state, action) {
+export function groupsReducer(groupsPerPage: number) {
+
+  return function(state: GroupsState, action: GroupsAction) {
     switch (action.type) {
 
       case SET_GROUPS: {
@@ -104,7 +125,7 @@ export function groupsReducer(groupsPerPage) {
       }
 
       default: {
-        throw new Error(`Unknown action type ${action.type}`);
+        throw new Error(`Unknown action ${action}`);
       }
     }
   };
