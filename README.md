@@ -1,7 +1,3 @@
-# TODO
-* [important] unit test
-* output result dialog layout issue
- 
 # Component Design
 
 ![Image of Component Design](https://github.com/sevenbamboos/anki-preview-page-react/blob/master/design/components-design.png)
