@@ -7,17 +7,17 @@ export type MessageErrorType = {
 
 // TODO how to avoid using any for a function used by multiple components with different types of state?
 
-export function setErrorState(state: any, error: string) {
+export function setErrorState<T extends MessageErrorType>(state: T, error: string): T {
   return {...state, message: null, error};
 }
 
-export function setMessageState(state: any, message: string) {
+export function setMessageState<T extends MessageErrorType>(state: T, message: string): T {
   return {...state, message, error: null};
 }
 
 type StringConsumer = (s: string) => void;
 
-export function useMessageAndError(state: any, onMessage: StringConsumer, onError: StringConsumer) {
+export function useMessageAndError<T extends MessageErrorType>(state: T, onMessage: StringConsumer, onError: StringConsumer) {
   useEffect(() => {
     if (state.message) onMessage(state.message);
   }, [state.message, onMessage]);

@@ -33,21 +33,21 @@ function getItemsOnPage<T>(
   }
 }
 
-type NavigateToPageSuccessResult<T> = {
+export type NavigateToPageSuccessResult<T,K> = {
   message: string,
   page: number,
   currentItems: T[] 
 };
 
-export function navigateToPage<T>(
+export function navigateToPage<T,K>(
   itemsPerPage: number, 
   currentPageSupplier: () => number, 
   itemsSupplier: () => T[], 
   pageFunc: (x: number) => number, 
   messageFunc: (x: number) => string,
-  errorConsumer: (e: string) => void,
-  successConsumer: (result: NavigateToPageSuccessResult<T>) => void
-  ) {
+  errorConsumer: (e: string) => K,
+  successConsumer: (result: NavigateToPageSuccessResult<T,K>) => K
+  ) : K {
 
   const currentPage = currentPageSupplier();
   const wantedPage = pageFunc(currentPage);
@@ -65,23 +65,23 @@ export function navigateToPage<T>(
   }  
 }
 
-type ResetPageSuccessResult<T> = {
+type ResetPageSuccessResult<T, K> = {
   items: T[],
   currentItems: T[],
   page: number,
   totalPage: number
 };
 
-type ResetPageErrorResult<T> = ResetPageSuccessResult<T> & {
+type ResetPageErrorResult<T, K> = ResetPageSuccessResult<T, K> & {
   error: string
 };
 
-export function resetPage<T>(
+export function resetPage<T, K>(
   itemsSupplier: () => T[], 
   itemsPerPage: number,
-  errorConsumer: (error: ResetPageErrorResult<T>) => void,
-  successConsumer: (result: ResetPageSuccessResult<T>) => void
-  ) {
+  errorConsumer: (error: ResetPageErrorResult<T, K>) => K,
+  successConsumer: (result: ResetPageSuccessResult<T, K>) => K
+  ) : K {
 
   const items = itemsSupplier();
   const page = 1 // reset to the first page;

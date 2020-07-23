@@ -1,23 +1,38 @@
-import {setErrorState, setMessageState} from '../utils/error-message';
-import {navigateToPage} from '../utils/paginator-support';
+import {setErrorState, setMessageState, MessageErrorType} from '../utils/error-message';
+import {navigateToPage, NavigateToPageSuccessResult} from '../utils/paginator-support';
+import {CardData} from '../types';
 
-export const initState = {
+type CardsState = MessageErrorType & {
+  page: number,
+  card: CardData | null,
+  currentItems: CardData[]
+};
+
+export const initState: CardsState = {
   page: 1,
   message: null,
   error: null,
   card: null,
+  currentItems: []
 };
 
 export const NEXT_PAGE = 'NEXT_PAGE';
 export const PREV_PAGE = 'PREV_PAGE';
 export const GOTO_PAGE = 'GOTO_PAGE';
 
-const onNavigateSuccess = (state) => 
-  ({message, page, currentItems: [card]}) => {
+type CardsAction = {
+  type: typeof NEXT_PAGE | typeof PREV_PAGE
+} | {
+  type: typeof GOTO_PAGE
+  payload: number
+};
+
+const onNavigateSuccess = (state: CardsState) => 
+  ({message, page, currentItems: [card]}: NavigateToPageSuccessResult<CardData, CardsState>): CardsState => {
     return {...setMessageState(state, message), page, card}; 
   };
 
-export const cardsReducer = (cards) => (state, action) => {
+export const cardsReducer = (cards: CardData[]) => (state: CardsState, action: CardsAction): CardsState => {
   switch (action.type) {
 
     case NEXT_PAGE: {
@@ -29,7 +44,8 @@ export const cardsReducer = (cards) => (state, action) => {
         () => 'Next Card',
         (e) => setErrorState(state, e),
         onNavigateSuccess(state)
-      );  
+      );
+
     }
 
     case PREV_PAGE: {
@@ -57,7 +73,7 @@ export const cardsReducer = (cards) => (state, action) => {
     }
 
     default: {
-      throw new Error(`Unknown action type ${action.type}`);
+      throw new Error(`Unknown action ${action}`);
     }      
   };
 };

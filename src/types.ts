@@ -20,3 +20,9 @@ export type CardData = CardDTO & {
   clozeData: EQA, 
   basicData: EQA, 
 };
+
+export type GroupData = {
+  name: string, 
+  new: boolean, 
+  previewCards: CardData[]
+}
