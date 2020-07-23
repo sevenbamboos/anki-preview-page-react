@@ -65,14 +65,14 @@ export function navigateToPage<T,K>(
   }  
 }
 
-type ResetPageSuccessResult<T, K> = {
+export type ResetPageSuccessResult<T, K> = {
   items: T[],
   currentItems: T[],
   page: number,
   totalPage: number
 };
 
-type ResetPageErrorResult<T, K> = ResetPageSuccessResult<T, K> & {
+export type ResetPageErrorResult<T, K> = ResetPageSuccessResult<T, K> & {
   error: string
 };
 

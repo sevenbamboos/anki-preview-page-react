@@ -1,6 +1,6 @@
 import {useState, useCallback} from 'react';
 
-const useTimeTrigger = () => {
+const useTimeTrigger = (): [string, () => void] => {
   const [timeTrigger, setTimeTrigger] = useState(new Date().toString());
 
   const updateTimer = useCallback(() => {

@@ -1,13 +1,24 @@
 
-export function parseBasic(card: string) 
-  : [string, []] | [null, string[]] {
+type CardParseError = [string, []];
+type CardParseSuccess = [null, [string, string]]
+type CardParseResult = CardParseError | CardParseSuccess;
+
+export function isCardParseError(arr: CardParseResult): arr is CardParseError {
+  return arr[0] != null;
+}
+
+// export function isCardParseSuccess(arr: CardParseResult): arr is CardParseSuccess {
+//   return arr[0] == null && Array.isArray(arr[1]) && arr[1].length === 2;
+// }
+
+export function parseBasic(card: string) : CardParseResult {
   if (!card) return ['No Contents', []];
 
   const rst = card.split('|');
   if (!rst || rst.length !== 2) {
     return [`Can't parse ${card}`, []];
   } else {
-    return [null, rst];
+    return [null, [rst[0], rst[1]]];
   }
 }
 
@@ -41,8 +52,7 @@ class Token {
   };  
 }
 
-export function parseCloze(card: string)
-  : [string, []] | [null, [string, string]] {
+export function parseCloze(card: string) : CardParseResult {
   if (!card) return ['No Contents', []];
 
   const tokens = [];

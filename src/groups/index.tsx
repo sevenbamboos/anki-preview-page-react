@@ -1,11 +1,16 @@
 import React, {useReducer, useEffect, useContext} from 'react';
 import {groups as groupsService} from '../service';
 import * as ls from './styles';
-import * as store from './groups-store.js';
+import * as store from './groups-store';
 import {useMessageAndError, MessageAndErrorContext} from '../utils/error-message';
 import Paginator from '../utils/paginator';
+import { GroupData } from '../types';
 
-export function GroupNewIndicator({isNew}) {
+type GroupNewIndicatorProps = {
+  isNew: boolean
+};
+
+export function GroupNewIndicator({isNew}: GroupNewIndicatorProps) {
   return (
     <>
       { isNew && (
@@ -17,7 +22,14 @@ export function GroupNewIndicator({isNew}) {
   );
 }
 
-export default function Groups({fileName, groupsPerPage=12, onClose, onSelectGroup}){
+type GroupsProp = {
+  fileName: string,
+  groupsPerPage?: number,
+  onClose: () => void,
+  onSelectGroup: (g: GroupData) => void
+};
+
+export default function Groups({fileName, groupsPerPage=12, onClose, onSelectGroup}: GroupsProp){
 
   const [state, dispatcher] = useReducer(store.groupsReducer(groupsPerPage), store.initState);
   const {onMessage, onError} = useContext(MessageAndErrorContext);
@@ -43,7 +55,7 @@ export default function Groups({fileName, groupsPerPage=12, onClose, onSelectGro
 
   if (!state.groupsOnPage) return null;
 
-  let groupCount = (g) => g.previewCards && g.previewCards.length > 0 ? g.previewCards.length : 0; 
+  let groupCount = (g: GroupData) => g.previewCards && g.previewCards.length > 0 ? g.previewCards.length : 0; 
 
   let currentGroups = state.groupsOnPage.map(g => (
     <ls.GroupItem key={g.name} isNew={g.new} onClick={() => onSelectGroup(g)}>

@@ -1,4 +1,6 @@
-import { parseBasic, parseCloze } from './card/card-utils';
+import { parseBasic, parseCloze, isCardParseError } from './card/card-utils';
+import {CardDTO, CardData, GroupData, EQA, OutputResult} from './types';
+import {MessageErrorType} from './utils/error-message';
 
 export const SET_FILES = 'SET_FILES';
 export const SET_MESSAGE = 'SET_MESSAGE';
@@ -15,7 +17,15 @@ export const CLEAR_OUTPUT_RESULT = 'CLEAR_OUTPUT_RESULT';
 export const CLEAR_ALL_FILES = 'CLEAR_ALL_FILES';
 export const AFTER_UPLOAD = 'AFTER_UPLOAD';
 
-export const initState = {
+type AppState = MessageErrorType & {
+  files: string[],
+  selectedFile: string | null,
+  selectedGroup: GroupData | null,
+  checkedFiles: string[],
+  outputResult: OutputResult | null,
+};
+
+export const initState: AppState = {
   message: null, 
   error: null, 
   files: [],
@@ -25,48 +35,79 @@ export const initState = {
   outputResult: null,
 };
 
-function convertGroup(group) {
+function convertGroup(group: GroupData) {
   if (!group || !group.previewCards) return group;
 
   group.previewCards.forEach(c => convertCard(c));
   return group;
 }
 
-function convertCard(card) {
-  if (!card || card.error) return card;
-
-  if (!card.clozeData && card.forCloze && card.cloze) {
-    const clozeData = {error: null};
-    const [error, result] = parseCloze(card.cloze);
-    if (error) clozeData.error = error;
-    else {
-      clozeData.question = result[0];
-      clozeData.answer = result[1];
-    }
-    card.clozeData = clozeData;
-  }
-
-  if (!card.basicData && card.forBasic && card.basic) {
-    const basicData = {error: null};
-    const [error, result] = parseBasic(card.basic);
-    if (error) basicData.error = error;
-    else {
-      basicData.question = result[0];
-      basicData.answer = result[1];
-    }
-    card.basicData = basicData;
-  }
-
-  return card;
+function isCardData(card: any): card is CardData {
+  return card.clozeData && card.basicData;
 }
 
-function fileChecked(file, files) {
+function convertCard(card: CardDTO | CardData): CardData | CardDTO {
+
+  if (!card) return card;
+
+  if (card.error) return card;
+
+  if (isCardData(card)) return card;
+
+  let clozeData: EQA | null = null;
+  if (card.forCloze && card.cloze) {
+    const result = parseCloze(card.cloze);
+    if (isCardParseError(result)) {
+      clozeData = {error: result[0]};
+    } else {
+      const [question, answer] = result[1];
+      clozeData = {question, answer};
+    }
+  }
+
+  let basicData: EQA | null = null;
+  if (card.forBasic && card.basic) {
+    const result = parseBasic(card.basic);
+    if (isCardParseError(result)) {
+      basicData = {error: result[0]};
+    } else {
+      const [question, answer] = result[1];
+      basicData = {question, answer};
+    }
+  }
+
+  return {...card, clozeData, basicData};
+}
+
+function fileChecked(file: string, files: string[]) {
   if (!file || !files) return [false, -1];
   const foundIndex = files.findIndex(f => f === file);
   return [foundIndex !== -1, foundIndex]
 }
 
-export function appReducer(st, action) {
+type AppAction = {
+  type: typeof SET_MESSAGE | typeof SET_ERROR,
+  payload: string
+} | {
+  type: typeof SET_FILES,
+  payload: string[]
+} | {
+  type: typeof AFTER_UPLOAD | typeof UNSELECT_FILE | typeof CLEAR_ALL_FILES | typeof UNSELECT_GROUP | typeof UNCHECK_ALL_FILE | typeof CLEAR_OUTPUT_RESULT
+} | {
+  type: typeof SELECT_FILE,
+  payload: string
+} | {
+  type: typeof SELECT_GROUP,
+  payload: GroupData
+} | {
+  type: typeof CHECK_FILE | typeof UNCHECK_FILE,
+  payload: string
+} | {
+  type: typeof SET_OUTPUT_RESULT,
+  payload: OutputResult
+};
+
+export function appReducer(st: AppState, action: AppAction) {
   switch (action.type) {
     case SET_MESSAGE: {
       return {...st, error: null, message: action.payload};
@@ -129,7 +170,7 @@ export function appReducer(st, action) {
         return {...st, outputResult: null};
     }
     default: {
-      throw new Error(`Unknown action type ${action.type}`);
+      throw new Error(`Unknown action ${action}`);
     }
   }  
 }

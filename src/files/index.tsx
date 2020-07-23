@@ -18,12 +18,12 @@ export const Files = ({children}: FilesProps) => {
 
 type CheckEvent = {
   checked: boolean,
-  value: File
+  value: string
 };
 
 type FileProps = {
-  file: File,
-  onSelect: (f: File) => void,
+  file: string,
+  onSelect: (f: string) => void,
   onCheck: (evt: CheckEvent) => void
 };
 
