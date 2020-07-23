@@ -1,6 +1,5 @@
 # TODO
 * [important] unit test
-* [important] adapt typescript
 * output result dialog layout issue
  
 # Component Design
