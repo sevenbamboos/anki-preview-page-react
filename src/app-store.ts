@@ -38,7 +38,7 @@ export const initState: AppState = {
 function convertGroup(group: GroupData) {
   if (!group || !group.previewCards) return group;
 
-  group.previewCards.forEach(c => convertCard(c));
+  group.previewCards = group.previewCards.map(c => convertCard(c));
   return group;
 }
 
@@ -46,11 +46,11 @@ function isCardData(card: any): card is CardData {
   return card.clozeData && card.basicData;
 }
 
-function convertCard(card: CardDTO | CardData): CardData | CardDTO {
+function convertCard(card: CardDTO | CardData): CardData {
 
   if (!card) return card;
 
-  if (card.error) return card;
+  if (card.error) return {...card, clozeData: null, basicData: null};
 
   if (isCardData(card)) return card;
 

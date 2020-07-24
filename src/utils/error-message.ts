@@ -5,7 +5,12 @@ export type MessageErrorType = {
   error: string | null
 };
 
-// TODO how to avoid using any for a function used by multiple components with different types of state?
+export function toError(error: any): string {
+  if (typeof error === 'string') return error;
+  else if (error.message) return error.message as string;
+  else if (error.toString) return error.toString() as string;
+  else return 'Unknown error';
+}
 
 export function setErrorState<T extends MessageErrorType>(state: T, error: string): T {
   return {...state, message: null, error};

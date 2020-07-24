@@ -11,7 +11,7 @@ import Groups from './groups';
 import Cards from './cards';
 import * as store from './app-store';
 import {version} from '../package.json';
-import {MessageAndErrorContext} from './utils/error-message';
+import {MessageAndErrorContext, toError} from './utils/error-message';
 
 function App() {
 
@@ -25,7 +25,7 @@ function App() {
         const files = await filesService();
         dispatcher({type: store.SET_FILES, payload: files}); 
       } catch (err) {
-        dispatcher({type: store.SET_ERROR, payload: err});
+        dispatcher({type: store.SET_ERROR, payload: toError(err)});
       }
     };
     getFiles();
@@ -40,7 +40,7 @@ function App() {
       dispatcher({type: store.CLEAR_ALL_FILES});
       setFilesChanged();
     } catch (err) {
-      dispatcher({type: store.SET_ERROR, payload: err});
+      dispatcher({type: store.SET_ERROR, payload: toError(err)});
     }
   }, [setFilesChanged]);
 
@@ -69,7 +69,7 @@ function App() {
   }, [setFilesChanged]);
 
   const onError = useCallback((err) => {
-    dispatcher({type: store.SET_ERROR, payload: err});
+    dispatcher({type: store.SET_ERROR, payload: toError(err)});
   }, []);
 
   const onMessage = useCallback((msg) => {
