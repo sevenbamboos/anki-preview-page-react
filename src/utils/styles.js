@@ -1,5 +1,17 @@
 import styled, {keyframes, css} from 'styled-components';
 import {NavigateNext, NavigateBefore, FirstPage, LastPage} from '@styled-icons/material';
+import {FileCode} from '@styled-icons/fa-regular';
+import {CreditCard} from '@styled-icons/boxicons-regular/CreditCard';
+
+export const FilesIcon = styled(FileCode)`
+  height: 10px;
+  padding-right: 3px;
+`;
+
+export const GroupsIcon = styled(CreditCard)`
+  height: 10px;
+  padding-right: 3px;
+`;
 
 export const FirstPageIcon = styled(FirstPage)`
   color: black;
@@ -121,4 +133,26 @@ export const PaginatorPageSpan = styled.span`
 export const PaginatorPageProgress = styled.progress`
   margin: 5px;
   height: 20px;
+`;
+
+export const BreadcrumbSection = styled.section`
+  background-color: rgb(200, 200, 200, 0.5);
+  color: #333;
+  font-size: 11px;
+  line-height: 30px;
+  margin: 10px 0px;
+  border-radius: 5px;
+  display: flex;
+  justify-content: flex-start;
+  padding: 3px;
+  width: 75%
+`;
+
+export const BreadcrumbButton = styled.button`
+  font-size: 11px;
+  margin: 5px;
+`;
+
+export const BreadcrumbSpan = styled.span`
+  margin-left: 10px;
 `;

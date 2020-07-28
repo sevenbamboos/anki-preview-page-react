@@ -5,6 +5,7 @@ import {ClearBtn, OutputBtn, FilesBtn} from './toolbar';
 import Uploader from './uploader';
 import {upload as uploadService, files as filesService, clear as clearService, outputs as outputsService} from './service';
 import useTimeTrigger from './utils/time-trigger';
+import Breadcrumb from './utils/breadcrumb';
 import {InfoDialog, OutputResultSummary, ErrorBar, MessageBar} from './utils/widgets';
 import {Files, File} from './files';
 import Groups from './groups';
@@ -12,11 +13,26 @@ import Cards from './cards';
 import * as store from './app-store';
 import {version} from '../package.json';
 import {MessageAndErrorContext, toError} from './utils/error-message';
+import {
+  Switch,
+  Route,
+  // Link,
+  Redirect,
+  useHistory
+} from 'react-router-dom';
+
+import { GroupData } from './types';
 
 function App() {
 
   const [filesChanged, setFilesChanged] = useTimeTrigger();
   const [state, dispatcher] = useReducer(store.appReducer, store.initState);
+  const history = useHistory();
+
+  const gotoFiles = useCallback(() => history.push('/files'), [history]);
+  const gotoGroups = useCallback(() => history.push('/groups'), [history]);
+  const gotoGroup = useCallback(() => history.push('/group'), [history]);
+  const gotoHome = useCallback(() => history.push('/'), [history]);
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -39,10 +55,11 @@ function App() {
       await clearService();
       dispatcher({type: store.CLEAR_ALL_FILES});
       setFilesChanged();
+      gotoHome();
     } catch (err) {
       dispatcher({type: store.SET_ERROR, payload: toError(err)});
     }
-  }, [setFilesChanged]);
+  }, [setFilesChanged, gotoHome]);
 
   const output = useCallback(async (fileNames) => {
     if (!fileNames || fileNames.length === 0) {
@@ -53,20 +70,22 @@ function App() {
     try {
       const result = await outputsService(fileNames);
       dispatcher({type: store.SET_OUTPUT_RESULT, payload: result});
+      gotoHome();
     } catch (err) {
       dispatcher({type: store.SET_ERROR, payload: err.message});
     }
-  }, [])  
+  }, [gotoHome])  
 
   const doUpload = useCallback(async (file) => {
     try {
       await uploadService(file);
       dispatcher({type: store.AFTER_UPLOAD}); 
       setFilesChanged();
+      gotoFiles();
     } catch (err) {
       throw err;
     }
-  }, [setFilesChanged]);
+  }, [setFilesChanged, gotoFiles]);
 
   const onError = useCallback((err) => {
     dispatcher({type: store.SET_ERROR, payload: toError(err)});
@@ -78,11 +97,13 @@ function App() {
 
   const onSelectFile = useCallback((file) => {
     dispatcher({type: store.SELECT_FILE, payload: file});
-  }, []);
+    gotoGroups();
+  }, [gotoGroups]);
 
   const onUnSelectFile = useCallback(() => {
     dispatcher({type: store.UNSELECT_FILE});
-  }, []);
+    gotoFiles();
+  }, [gotoFiles]);
 
   const onCheckFile = useCallback((event) => {
     if (event.checked) {
@@ -94,11 +115,13 @@ function App() {
 
   const onSelectGroup = useCallback((group) => {
     dispatcher({type: store.SELECT_GROUP, payload: group});
-  }, []);
+    gotoGroup();
+  }, [gotoGroup]);
 
   const onUnSelectGroup = useCallback(() => {
     dispatcher({type: store.UNSELECT_GROUP});
-  }, []);
+    gotoGroups();
+  }, [gotoGroups]);
 
   const onClearOutputResult = useCallback(() => {
     dispatcher({type: store.CLEAR_OUTPUT_RESULT});
@@ -128,23 +151,45 @@ function App() {
     topBar = <MessageBar>version {version}</MessageBar>;
   }
 
-  let contents = <Splitter />;
-  if (state.selectedGroup) {
-    contents = 
-    <Cards group={state.selectedGroup} onClose={onUnSelectGroup} />;
+  const renderGroup = (group: GroupData | null) => {
+    if (!group) {
+      return (
+        <section><h3>No group contents</h3></section>
+      );
+    } else {
+      return (
+        <Cards group={group} onClose={onUnSelectGroup} />
+      );
+    }
+  };
 
-  } else if (state.selectedFile) {
-    contents = 
-    <Groups fileName={state.selectedFile} onClose={onUnSelectFile} onSelectGroup={onSelectGroup} />;
+  const renderGroups = (file: string | null) => {
+    if (!file) {
+      return (
+        <section><h3>No groups</h3></section>
+      );
+    } else {
+      return (
+        <Groups fileName={file} onClose={onUnSelectFile} onSelectGroup={onSelectGroup} />
+      );
+    }
+  };
 
-  } else if (state.files.length > 0) {
-    contents = 
-    <Files>
-      {state.files.map(f =>
-        <File key={f} file={f} onSelect={onSelectFile} onCheck={onCheckFile}/>
-      )}
-    </Files>;
-  }
+  const renderFiles = (files: string[]) => {
+    if (files.length === 0) {
+      return (
+        <section><h3>No files</h3></section>
+      );
+    } else {
+      return (
+        <Files>
+          {files.map(f =>
+            <File key={f} file={f} onSelect={onSelectFile} onCheck={onCheckFile}/>
+          )}
+        </Files>
+      );
+    }
+  };
 
   return (
     <>
@@ -163,7 +208,15 @@ function App() {
             <OutputBtn onOutput={() => output(state.checkedFiles)} />
           </Toolbar>
 
-          { contents }
+          <Breadcrumb files={state.files} selectedFile={state.selectedFile} selectedGroup={state.selectedGroup} />
+
+          <Switch>
+            <Route path='/group' render={() => renderGroup(state.selectedGroup)} />
+            <Route path='/groups' render={() => renderGroups(state.selectedFile)} />
+            <Route path='/files' render={() => renderFiles(state.files)} />
+            <Route path='/'><Splitter /></Route>
+            <Redirect to='/' />
+          </Switch>
 
         </MessageAndErrorContext.Provider>
         {outputResultPop}

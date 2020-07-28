@@ -117,7 +117,7 @@ export function appReducer(st: AppState, action: AppAction) {
     }
     case SET_FILES: {
       const files = action.payload;
-      return {...st, files, checkedFiles: files, selectedFile: files.length === 1 ? files[0] : null, selectedGroup: null};
+      return {...st, files, checkedFiles: files, selectedFile: null, selectedGroup: null};
     }
     case AFTER_UPLOAD: {
       return {...st, selectedFile: null, selectedGroup: null, message: 'File Uploaded'};
@@ -164,7 +164,7 @@ export function appReducer(st: AppState, action: AppAction) {
         return {...st, checkedFiles: []};
     }
     case SET_OUTPUT_RESULT: {
-        return {...st, outputResult: action.payload, selectedGroup: null, selectedFile: null};
+        return {...st, outputResult: action.payload, files: [], selectedGroup: null, selectedFile: null};
     }
     case CLEAR_OUTPUT_RESULT: {
         return {...st, outputResult: null};

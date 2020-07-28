@@ -78,6 +78,6 @@ export const CardPageProgress = styled.progress`
 
 export const CardItem = styled.div`
   width: 500px;
-  height: 400px;
+  height: 350px;
   outline: 1px solid #ddd;
 `;
