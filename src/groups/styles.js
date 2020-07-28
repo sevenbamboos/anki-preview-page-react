@@ -50,7 +50,7 @@ export const GroupList = styled.div`
   display: flex;
   flex-wrap: wrap;
   align-content: flex-start;
-  height: 400px;
+  height: 350px;
   margin: 10px;
 `;
 

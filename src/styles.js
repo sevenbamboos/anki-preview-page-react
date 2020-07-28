@@ -26,7 +26,7 @@ export const Container = styled.section`
   padding: 4em;
   padding-top: 20px;
   background: #f9f9f9;
-  height: 550px; // FIXME
+  height: 500px; // FIXME
   margin-top: 10px;
   margin-bottom: 20px;
   margin-right: auto;

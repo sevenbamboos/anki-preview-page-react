@@ -9,12 +9,14 @@ type TabBtnProps = {
   tabName: store.TAB_NAMES,
   children: ReactNode,
   isActive: boolean,
+  disabled: boolean,
   dispatcher: Dispatch<store.CardAction>
 };
 
-function TabBtn({tabName, children, isActive, dispatcher}: TabBtnProps) {
+function TabBtn({tabName, children, isActive, disabled, dispatcher}: TabBtnProps) {
   return (
-    <st.CardButton 
+    <st.CardButton
+      disabled={disabled} 
       isActive={isActive}
       onClick={() => dispatcher({type: store.EVENT_SWITCH_TAB, payload: tabName})}
       title={store.TABS[tabName]}>
@@ -137,7 +139,7 @@ export default function Card({card}: CardProps) {
 
   const {forCloze, forBasic, tags, clozeData: cloze, basicData: basic, source} = card;
 
-  const [state, dispatcher] = useReducer(store.cardReducer(card), store.initState);
+  const [state, dispatcher] = useReducer(store.cardReducer(card), {...store.initState, tabName: store.initTab(card)});
 
   const {onMessage, onError} = useContext(MessageAndErrorContext);
 
@@ -158,18 +160,21 @@ export default function Card({card}: CardProps) {
         <TabBtn 
           tabName={store.TAB_BASIC} 
           isActive={store.isCurrentTab(state, store.TAB_BASIC)} 
+          disabled={!forBasic}
           dispatcher={dispatcher}>
             <st.BasicIcon/>
         </TabBtn>
         <TabBtn 
           tabName={store.TAB_CLOZE} 
           isActive={store.isCurrentTab(state, store.TAB_CLOZE)} 
+          disabled={!forCloze}
           dispatcher={dispatcher}>
             <st.ClozeIcon/>
         </TabBtn>
         <TabBtn 
           tabName={store.TAB_SOURCE} 
           isActive={store.isCurrentTab(state, store.TAB_SOURCE)} 
+          disabled={false}
           dispatcher={dispatcher}>
             <st.SourceIcon/>
         </TabBtn>

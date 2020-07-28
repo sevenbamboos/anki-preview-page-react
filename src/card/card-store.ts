@@ -45,6 +45,12 @@ export function getNextCardStatus(current: string) {
   }
 }
 
+export function initTab(card: CardData): TAB_NAMES {
+  if (card.forBasic) return TAB_BASIC;
+  else if (card.forCloze) return TAB_CLOZE;
+  else return TAB_SOURCE;
+}
+
 function switchTab(card: CardData, state: CardState, tabName: TAB_NAMES) {
   const currentTab = state.tabName;
   if (tabName === currentTab) return state;
