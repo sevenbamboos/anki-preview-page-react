@@ -19,7 +19,7 @@ function Filescrumb({isLink=false}: FilescrumbProps) {
     );
   } else {
     return (
-      <ls.BreadcrumbSpan>Files</ls.BreadcrumbSpan>
+      <ls.BreadcrumbSpan>(Files)</ls.BreadcrumbSpan>
     );
   }
 }
@@ -41,7 +41,7 @@ function Filecrumb({file, isLink=false}: FilecrumbProps) {
     );
   } else {
     return (
-      <ls.BreadcrumbSpan>{file}</ls.BreadcrumbSpan>
+      <ls.BreadcrumbSpan>({file})</ls.BreadcrumbSpan>
     );
   }
 }
@@ -62,7 +62,7 @@ function Groupcrumb({group, isLink=false}: GroupcrumbProps) {
     );
   } else {
     return (
-      <ls.BreadcrumbSpan>{group.name}</ls.BreadcrumbSpan>
+      <ls.BreadcrumbSpan>({group.name})</ls.BreadcrumbSpan>
     );
   }
 }
@@ -78,8 +78,11 @@ export default function Breadcrumb({files, selectedFile, selectedGroup}: Breadcr
   if (selectedGroup && selectedFile && files.length > 0) {
     return (
       <ls.BreadcrumbSection>
+        <ls.ArrowRightIcon />
         <Filescrumb isLink />
+        <ls.ArrowRightIcon />
         <Filecrumb file={selectedFile} isLink />
+        <ls.ArrowRightIcon />
         <Groupcrumb group={selectedGroup} />
       </ls.BreadcrumbSection>
     );
@@ -87,7 +90,9 @@ export default function Breadcrumb({files, selectedFile, selectedGroup}: Breadcr
   } else if (!selectedGroup && selectedFile && files.length > 0) {
     return (
       <ls.BreadcrumbSection>
+        <ls.ArrowRightIcon />
         <Filescrumb isLink />
+        <ls.ArrowRightIcon />
         <Filecrumb file={selectedFile} />
       </ls.BreadcrumbSection>
     );

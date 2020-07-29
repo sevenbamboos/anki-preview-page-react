@@ -2,6 +2,12 @@ import styled, {keyframes, css} from 'styled-components';
 import {NavigateNext, NavigateBefore, FirstPage, LastPage} from '@styled-icons/material';
 import {FileCode} from '@styled-icons/fa-regular';
 import {CreditCard} from '@styled-icons/boxicons-regular/CreditCard';
+import {ArrowRight} from '@styled-icons/material-sharp/ArrowRight';
+
+export const ArrowRightIcon = styled(ArrowRight)`
+  height: 20px;
+  padding: 5px 0px;
+`;
 
 export const FilesIcon = styled(FileCode)`
   height: 10px;
@@ -136,23 +142,32 @@ export const PaginatorPageProgress = styled.progress`
 `;
 
 export const BreadcrumbSection = styled.section`
-  background-color: rgb(200, 200, 200, 0.5);
   color: #333;
   font-size: 11px;
   line-height: 30px;
   margin: 10px 0px;
-  border-radius: 5px;
   display: flex;
   justify-content: flex-start;
   padding: 3px;
-  width: 75%
+  border-bottom: solid;
+  border-top: solid;
+  border-width: thin;
+  border-radius: 3px;
+
+  &:before {
+    content: "Nav Bar";
+  }
 `;
 
 export const BreadcrumbButton = styled.button`
   font-size: 11px;
   margin: 5px;
+  border-width: 1px;
+  border-radius: 8px;
+  padding: 3px 10px;
+  background: #abd5ea;
 `;
 
 export const BreadcrumbSpan = styled.span`
-  margin-left: 10px;
+  margin-left: 3px;
 `;
