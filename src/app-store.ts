@@ -1,6 +1,18 @@
 import { parseBasic, parseCloze, isCardParseError } from './card/card-utils';
 import {CardDTO, CardData, GroupData, EQA, OutputResult} from './types';
 import {MessageErrorType} from './utils/error-message';
+import { configureStore } from '@reduxjs/toolkit';
+import filesReducer, {FilesState} from './files/files-slice';
+
+export default configureStore({
+  reducer: {
+    files: filesReducer
+  }
+});
+
+export type RootState = {
+  files: FilesState
+};
 
 export const SET_FILES = 'SET_FILES';
 export const SET_MESSAGE = 'SET_MESSAGE';
@@ -17,7 +29,7 @@ export const CLEAR_OUTPUT_RESULT = 'CLEAR_OUTPUT_RESULT';
 export const CLEAR_ALL_FILES = 'CLEAR_ALL_FILES';
 export const AFTER_UPLOAD = 'AFTER_UPLOAD';
 
-type AppState = MessageErrorType & {
+export type AppState = MessageErrorType & {
   files: string[],
   selectedFile: string | null,
   selectedGroup: GroupData | null,
@@ -173,4 +185,4 @@ export function appReducer(st: AppState, action: AppAction) {
       throw new Error(`Unknown action ${action}`);
     }
   }  
-}
+};

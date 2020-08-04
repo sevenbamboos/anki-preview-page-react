@@ -3,11 +3,16 @@ import { GlobalStyle, Title, Container, UploaderWrapper, Splitter } from './styl
 import { Toolbar } from './toolbar/styles';
 import {ClearBtn, OutputBtn, FilesBtn} from './toolbar';
 import Uploader from './uploader';
-import {upload as uploadService, files as filesService, clear as clearService, outputs as outputsService} from './service';
+import {
+  upload as uploadService, 
+  // files as filesService, 
+  // clear as clearService, 
+  outputs as outputsService
+} from './service';
 import useTimeTrigger from './utils/time-trigger';
 import Breadcrumb from './utils/breadcrumb';
 import {InfoDialog, OutputResultSummary, ErrorBar, MessageBar} from './utils/widgets';
-import {Files, File} from './files';
+import {Files, File, FileUploadTime} from './files';
 import Groups from './groups';
 import Cards from './cards';
 import * as store from './app-store';
@@ -20,8 +25,9 @@ import {
   Redirect,
   useHistory
 } from 'react-router-dom';
-
+import { useSelector, useDispatch } from 'react-redux';
 import { GroupData } from './types';
+import { selectAllFiles, selectAllFileIds, fetchFiles as fetchFilesAction, clearFiles as clearFilesAction, FileData } from './files/files-slice';
 
 function App() {
 
@@ -29,37 +35,41 @@ function App() {
   const [state, dispatcher] = useReducer(store.appReducer, store.initState);
   const history = useHistory();
 
+  const dispatch = useDispatch();
+
   const gotoFiles = useCallback(() => history.push('/files'), [history]);
   const gotoGroups = useCallback(() => history.push('/groups'), [history]);
   const gotoGroup = useCallback(() => history.push('/group'), [history]);
-  const gotoHome = useCallback(() => history.push('/'), [history]);
+  const gotoHome = useCallback(() => history.push('/files'), [history]);
 
   useEffect(() => {
     const abortController = new AbortController();
-    const getFiles = async () => {
-      try {
-        const files = await filesService();
-        dispatcher({type: store.SET_FILES, payload: files}); 
-      } catch (err) {
-        dispatcher({type: store.SET_ERROR, payload: toError(err)});
-      }
-    };
-    getFiles();
+    // const getFiles = async () => {
+    //   try {
+    //     const files = await filesService();
+    //     dispatcher({type: store.SET_FILES, payload: files}); 
+    //   } catch (err) {
+    //     dispatcher({type: store.SET_ERROR, payload: toError(err)});
+    //   }
+    // };
+    // getFiles();
+    dispatch(fetchFilesAction());
 
     return () => abortController.abort();
 
-  }, [filesChanged]);
+  }, [filesChanged, dispatch]);
 
   const clearFiles = useCallback(async () => {
     try {
-      await clearService();
+      dispatch(clearFilesAction());
+      // await clearService();
       dispatcher({type: store.CLEAR_ALL_FILES});
       setFilesChanged();
       gotoHome();
     } catch (err) {
       dispatcher({type: store.SET_ERROR, payload: toError(err)});
     }
-  }, [setFilesChanged, gotoHome]);
+  }, [setFilesChanged, gotoHome, dispatch]);
 
   const output = useCallback(async (fileNames) => {
     if (!fileNames || fileNames.length === 0) {
@@ -175,7 +185,10 @@ function App() {
     }
   };
 
-  const renderFiles = (files: string[]) => {
+  const filesFromReduxStore = useSelector(selectAllFiles);
+  const fileIdsFromReduxStore = useSelector(selectAllFileIds);
+
+  const renderFiles = (files: FileData[]) => {
     if (files.length === 0) {
       return (
         <section><h3>No files</h3></section>
@@ -184,7 +197,9 @@ function App() {
       return (
         <Files>
           {files.map(f =>
-            <File key={f} file={f} onSelect={onSelectFile} onCheck={onCheckFile}/>
+            <File key={f.id} file={f.id} onSelect={onSelectFile} onCheck={onCheckFile}>
+              <FileUploadTime dateIOSString={f.created}/>
+            </File>
           )}
         </Files>
       );
@@ -198,13 +213,12 @@ function App() {
         {topBar}
         <Title>Anki Previewer</Title>
         <MessageAndErrorContext.Provider value={{onMessage, onError}}>
-
           <Toolbar>
             <UploaderWrapper>
               <Uploader doUpload={doUpload} />
             </UploaderWrapper>
             <FilesBtn files={state.files} />
-            <ClearBtn onClear={clearFiles} fileCount={state.files.length} />
+            <ClearBtn onClear={clearFiles} fileCount={fileIdsFromReduxStore.length} />
             <OutputBtn onOutput={() => output(state.checkedFiles)} />
           </Toolbar>
 
@@ -213,12 +227,12 @@ function App() {
           <Switch>
             <Route path='/group' render={() => renderGroup(state.selectedGroup)} />
             <Route path='/groups' render={() => renderGroups(state.selectedFile)} />
-            <Route path='/files' render={() => renderFiles(state.files)} />
+            <Route path='/files' render={() => renderFiles(filesFromReduxStore)} />
             <Route path='/'><Splitter /></Route>
             <Redirect to='/' />
           </Switch>
-
         </MessageAndErrorContext.Provider>
+
         {outputResultPop}
       </Container>
       

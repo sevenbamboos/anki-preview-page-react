@@ -58,3 +58,7 @@ export const FileItemCheck = styled.input`
   margin: 8px 20px;
 `;
 
+export const FileUploadTimeSpan = styled.span`
+  font-size: 10px;
+  font-style: italic;
+`;
