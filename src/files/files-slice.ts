@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { 
   NormalizedObjects,
   FetchStatus,
@@ -30,12 +30,15 @@ export type FileData = {
 
 export type FilesState = NormalizedObjects<FileData> & {
   status: FetchStatus,
-  error: string | null
+  error: string | null,
+  selectedFile?: string,
+  checkedFiles: string[],
 };
 
 const initialState: FilesState = {
   status: statusIdle,
   error: null,
+  checkedFiles: [],
   ids: ['sample.md'],
   entities: {
     'sample.md': { id: 'sample.md', created: new Date().toISOString()}
@@ -65,16 +68,38 @@ const filesSlice = createSlice({
   name: 'files',
   initialState,
   reducers: {
+    fileChecked(state, action: PayloadAction<string>) {
+      const checkedFile = action.payload;
+      if (state.checkedFiles.findIndex(x => x === checkedFile) === -1) {
+        state.checkedFiles.push(checkedFile);
+      }
+    },
+    fileUnchecked(state, action: PayloadAction<string>) {
+      const uncheckedFile = action.payload;
+      const foundIndex = state.checkedFiles.findIndex(x => x === uncheckedFile);
+      if (foundIndex !== -1) {
+        state.checkedFiles.splice(foundIndex, 1);
+      }
+    },
+    fileAllUnchecked(state) {
+      state.checkedFiles = [];
+    }
   },
   extraReducers: builder => {
 
-    builder.addCase(fetchFiles.pending, (state, action) => {
+    builder.addCase(fetchFiles.pending, (state) => {
       state.status = statusLoading;
     });
 
     builder.addCase(fetchFiles.fulfilled, (state, action) => {
       state.status = statusSucceeded;
-      normalizedObjectsAddAll<string, FileData>(state, fileMapper, fileDataToId, action.payload);
+      const fetchedFiles = action.payload;
+      normalizedObjectsAddAll<string, FileData>(state, fileMapper, fileDataToId, fetchedFiles);
+      fetchedFiles.forEach(x => {
+        if (state.checkedFiles.findIndex(y => y === x) === -1) {
+          state.checkedFiles.push(x);
+        }
+      });
     });
 
     builder.addCase(fetchFiles.rejected, (state, action) => {
@@ -102,5 +127,8 @@ const fileSorter = (f1: FileData, f2: FileData): number => f2.created.localeComp
 
 export const selectAllFiles = (state: RootState) => normalizedObjectsGetAll(state.files, fileSorter);
 export const selectAllFileIds = (state: RootState) => state.files.ids;
+export const selectAllCheckedFiles = (state: RootState) => state.files.checkedFiles;
+
+export const {fileChecked, fileUnchecked, fileAllUnchecked} = filesSlice.actions;
 
 export default filesSlice.reducer;

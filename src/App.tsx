@@ -1,4 +1,4 @@
-import React, {useReducer, useCallback, useEffect} from 'react';
+import React, {useReducer, useCallback} from 'react';
 import { GlobalStyle, Title, Container, UploaderWrapper, Splitter } from './styles';
 import { Toolbar } from './toolbar/styles';
 import {ClearBtn, OutputBtn, FilesBtn} from './toolbar';
@@ -9,7 +9,6 @@ import {
   // clear as clearService, 
   outputs as outputsService
 } from './service';
-import useTimeTrigger from './utils/time-trigger';
 import Breadcrumb from './utils/breadcrumb';
 import {InfoDialog, OutputResultSummary, ErrorBar, MessageBar} from './utils/widgets';
 import {Files, File, FileUploadTime} from './files';
@@ -27,11 +26,19 @@ import {
 } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { GroupData } from './types';
-import { selectAllFiles, selectAllFileIds, fetchFiles as fetchFilesAction, clearFiles as clearFilesAction, FileData } from './files/files-slice';
+import { 
+  selectAllFiles, 
+  selectAllFileIds, 
+  selectAllCheckedFiles,
+  fetchFiles as fetchFilesAction, 
+  clearFiles as clearFilesAction,
+  fileChecked as fileCheckedAction,
+  fileUnchecked as fileUncheckedAction,
+  FileData 
+} from './files/files-slice';
 
 function App() {
 
-  const [filesChanged, setFilesChanged] = useTimeTrigger();
   const [state, dispatcher] = useReducer(store.appReducer, store.initState);
   const history = useHistory();
 
@@ -40,36 +47,16 @@ function App() {
   const gotoFiles = useCallback(() => history.push('/files'), [history]);
   const gotoGroups = useCallback(() => history.push('/groups'), [history]);
   const gotoGroup = useCallback(() => history.push('/group'), [history]);
-  const gotoHome = useCallback(() => history.push('/files'), [history]);
+  const gotoHome = useCallback(() => history.push('/'), [history]);
 
-  useEffect(() => {
-    const abortController = new AbortController();
-    // const getFiles = async () => {
-    //   try {
-    //     const files = await filesService();
-    //     dispatcher({type: store.SET_FILES, payload: files}); 
-    //   } catch (err) {
-    //     dispatcher({type: store.SET_ERROR, payload: toError(err)});
-    //   }
-    // };
-    // getFiles();
-    dispatch(fetchFilesAction());
-
-    return () => abortController.abort();
-
-  }, [filesChanged, dispatch]);
+  const filesFromReduxStore = useSelector(selectAllFiles);
+  const fileIdsFromReduxStore = useSelector(selectAllFileIds);
+  const checkedFileIdsFromReduxStore = useSelector(selectAllCheckedFiles);
 
   const clearFiles = useCallback(async () => {
-    try {
-      dispatch(clearFilesAction());
-      // await clearService();
-      dispatcher({type: store.CLEAR_ALL_FILES});
-      setFilesChanged();
-      gotoHome();
-    } catch (err) {
-      dispatcher({type: store.SET_ERROR, payload: toError(err)});
-    }
-  }, [setFilesChanged, gotoHome, dispatch]);
+    dispatch(clearFilesAction());
+    gotoHome();
+  }, [gotoHome, dispatch]);
 
   const output = useCallback(async (fileNames) => {
     if (!fileNames || fileNames.length === 0) {
@@ -89,13 +76,12 @@ function App() {
   const doUpload = useCallback(async (file) => {
     try {
       await uploadService(file);
-      dispatcher({type: store.AFTER_UPLOAD}); 
-      setFilesChanged();
+      dispatch(fetchFilesAction());
       gotoFiles();
     } catch (err) {
       throw err;
     }
-  }, [setFilesChanged, gotoFiles]);
+  }, [gotoFiles, dispatch]);
 
   const onError = useCallback((err) => {
     dispatcher({type: store.SET_ERROR, payload: toError(err)});
@@ -117,11 +103,11 @@ function App() {
 
   const onCheckFile = useCallback((event) => {
     if (event.checked) {
-      dispatcher({type: store.CHECK_FILE, payload: event.value});
+      dispatch(fileCheckedAction(event.value));
     } else {
-      dispatcher({type: store.UNCHECK_FILE, payload: event.value});
+      dispatch(fileUncheckedAction(event.value));
     }
-  }, []);
+  }, [dispatch]);
 
   const onSelectGroup = useCallback((group) => {
     dispatcher({type: store.SELECT_GROUP, payload: group});
@@ -136,12 +122,6 @@ function App() {
   const onClearOutputResult = useCallback(() => {
     dispatcher({type: store.CLEAR_OUTPUT_RESULT});
   }, []);
-
-  useEffect(() => {
-    const abortController = new AbortController();
-    clearFiles();
-    return () => abortController.abort();
-  }, [clearFiles]);
 
   let outputResultPop = null;
   if (state.outputResult) {
@@ -185,9 +165,6 @@ function App() {
     }
   };
 
-  const filesFromReduxStore = useSelector(selectAllFiles);
-  const fileIdsFromReduxStore = useSelector(selectAllFileIds);
-
   const renderFiles = (files: FileData[]) => {
     if (files.length === 0) {
       return (
@@ -219,7 +196,7 @@ function App() {
             </UploaderWrapper>
             <FilesBtn files={state.files} />
             <ClearBtn onClear={clearFiles} fileCount={fileIdsFromReduxStore.length} />
-            <OutputBtn onOutput={() => output(state.checkedFiles)} />
+            <OutputBtn onOutput={() => output(checkedFileIdsFromReduxStore)} />
           </Toolbar>
 
           <Breadcrumb files={state.files} selectedFile={state.selectedFile} selectedGroup={state.selectedGroup} />
