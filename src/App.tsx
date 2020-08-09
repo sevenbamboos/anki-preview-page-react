@@ -5,8 +5,6 @@ import {ClearBtn, OutputBtn, FilesBtn} from './toolbar';
 import Uploader from './uploader';
 import {
   upload as uploadService, 
-  // files as filesService, 
-  // clear as clearService, 
   outputs as outputsService
 } from './service';
 import Breadcrumb from './utils/breadcrumb';
@@ -14,9 +12,8 @@ import {InfoDialog, OutputResultSummary, ErrorBar, MessageBar} from './utils/wid
 import {Files, File, FileUploadTime} from './files';
 import Groups from './groups';
 import Cards from './cards';
-import * as store from './app-store';
+import * as store from './app/app-store';
 import {version} from '../package.json';
-import {MessageAndErrorContext, toError} from './utils/error-message';
 import {
   Switch,
   Route,
@@ -34,8 +31,18 @@ import {
   clearFiles as clearFilesAction,
   fileChecked as fileCheckedAction,
   fileUnchecked as fileUncheckedAction,
-  FileData 
+  FileData, 
 } from './files/files-slice';
+
+import {
+  selectSelectedGroups,
+  fetchGroups as fetchGroupsAction,
+} from './groups/groups-slice';
+
+import {
+  selectError,
+  selectMessage
+} from './app/app-slice';
 
 function App() {
 
@@ -52,6 +59,7 @@ function App() {
   const filesFromReduxStore = useSelector(selectAllFiles);
   const fileIdsFromReduxStore = useSelector(selectAllFileIds);
   const checkedFileIdsFromReduxStore = useSelector(selectAllCheckedFiles);
+  const selectedGroupsFromReduxStore = useSelector(selectSelectedGroups);
 
   const clearFiles = useCallback(async () => {
     dispatch(clearFilesAction());
@@ -66,12 +74,13 @@ function App() {
 
     try {
       const result = await outputsService(fileNames);
+      dispatch(clearFilesAction());
       dispatcher({type: store.SET_OUTPUT_RESULT, payload: result});
       gotoHome();
     } catch (err) {
       dispatcher({type: store.SET_ERROR, payload: err.message});
     }
-  }, [gotoHome])  
+  }, [gotoHome, dispatch])  
 
   const doUpload = useCallback(async (file) => {
     try {
@@ -83,18 +92,9 @@ function App() {
     }
   }, [gotoFiles, dispatch]);
 
-  const onError = useCallback((err) => {
-    dispatcher({type: store.SET_ERROR, payload: toError(err)});
-  }, []);
-
-  const onMessage = useCallback((msg) => {
-    dispatcher({type: store.SET_MESSAGE, payload: msg});
-  }, []);
-
   const onSelectFile = useCallback((file) => {
-    dispatcher({type: store.SELECT_FILE, payload: file});
-    gotoGroups();
-  }, [gotoGroups]);
+    dispatch(fetchGroupsAction({fileName: file, history}));
+  }, [dispatch, history]);
 
   const onUnSelectFile = useCallback(() => {
     dispatcher({type: store.UNSELECT_FILE});
@@ -132,11 +132,13 @@ function App() {
     );
   }
 
+  const errorFromReduxStore = useSelector(selectError);
+  const messageFromReduxStore = useSelector(selectMessage);
   let topBar;
-  if (state.error) {
-    topBar = <ErrorBar>{state.error}</ErrorBar>;
-  } else if (state.message) {
-    topBar = <MessageBar>{state.message}</MessageBar>;
+  if (errorFromReduxStore) {
+    topBar = <ErrorBar>{errorFromReduxStore}</ErrorBar>;
+  } else if (messageFromReduxStore) {
+    topBar = <MessageBar>{messageFromReduxStore}</MessageBar>;
   } else {
     topBar = <MessageBar>version {version}</MessageBar>;
   }
@@ -153,7 +155,7 @@ function App() {
     }
   };
 
-  const renderGroups = (file: string | null) => {
+  const renderGroups = (file: string | undefined) => {
     if (!file) {
       return (
         <section><h3>No groups</h3></section>
@@ -189,26 +191,24 @@ function App() {
       <Container>
         {topBar}
         <Title>Anki Previewer</Title>
-        <MessageAndErrorContext.Provider value={{onMessage, onError}}>
           <Toolbar>
             <UploaderWrapper>
               <Uploader doUpload={doUpload} />
             </UploaderWrapper>
-            <FilesBtn files={state.files} />
+            <FilesBtn files={fileIdsFromReduxStore} />
             <ClearBtn onClear={clearFiles} fileCount={fileIdsFromReduxStore.length} />
             <OutputBtn onOutput={() => output(checkedFileIdsFromReduxStore)} />
           </Toolbar>
 
-          <Breadcrumb files={state.files} selectedFile={state.selectedFile} selectedGroup={state.selectedGroup} />
+          <Breadcrumb files={fileIdsFromReduxStore} selectedFile={state.selectedFile} selectedGroup={state.selectedGroup} />
 
           <Switch>
             <Route path='/group' render={() => renderGroup(state.selectedGroup)} />
-            <Route path='/groups' render={() => renderGroups(state.selectedFile)} />
+            <Route path='/groups' render={() => renderGroups(selectedGroupsFromReduxStore)} />
             <Route path='/files' render={() => renderFiles(filesFromReduxStore)} />
             <Route path='/'><Splitter /></Route>
             <Redirect to='/' />
           </Switch>
-        </MessageAndErrorContext.Provider>
 
         {outputResultPop}
       </Container>

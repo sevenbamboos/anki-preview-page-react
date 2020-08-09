@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+
 import { 
   NormalizedObjects,
   FetchStatus,
@@ -15,13 +16,11 @@ import {
 } from '../common';
 
 import {
-  // upload as uploadService, 
   files as filesFetchService, 
   clear as filesClearService, 
-  // outputs as outputsService
 } from '../service';
 
-import {RootState} from '../app-store'; 
+import {RootState} from '../app/app-store'; 
 
 export type FileData = {
   id: string,
@@ -39,9 +38,8 @@ const initialState: FilesState = {
   status: statusIdle,
   error: null,
   checkedFiles: [],
-  ids: ['sample.md'],
+  ids: [],
   entities: {
-    'sample.md': { id: 'sample.md', created: new Date().toISOString()}
   }
 };
 
@@ -49,18 +47,10 @@ const fileDataToId = (file: FileData) => file.id;
 const fileMapper = (fileName: string) => ({id: fileName, created: new Date().toISOString()});
 
 export const fetchFiles = createAsyncThunk('files/fetchFiles', async (_, {dispatch, getState}) => {
-  const {status} = getState() as FilesState;
-  if (status === statusLoading) {
-    Promise.reject('wait until the current file fetching finishes');
-  }
   return await filesFetchService();
 });
 
 export const clearFiles = createAsyncThunk('files/clearFiles', async (_, {dispatch, getState}) => {
-  const {status} = getState() as FilesState;
-  if (status === statusLoading) {
-    Promise.reject('wait until the current file fetching finishes');
-  }
   return await filesClearService();
 });
 
@@ -68,6 +58,12 @@ const filesSlice = createSlice({
   name: 'files',
   initialState,
   reducers: {
+    fileSelected(state, action: PayloadAction<string>) {
+      const selectedFile = action.payload;
+      if (state.ids.findIndex(x => x === selectedFile) !== -1) {
+        state.selectedFile = selectedFile;
+      }
+    },
     fileChecked(state, action: PayloadAction<string>) {
       const checkedFile = action.payload;
       if (state.checkedFiles.findIndex(x => x === checkedFile) === -1) {
@@ -94,7 +90,7 @@ const filesSlice = createSlice({
     builder.addCase(fetchFiles.fulfilled, (state, action) => {
       state.status = statusSucceeded;
       const fetchedFiles = action.payload;
-      normalizedObjectsAddAll<string, FileData>(state, fileMapper, fileDataToId, fetchedFiles);
+      normalizedObjectsAddAll<string, FileData>(state, fileMapper, fileDataToId, (x) => x, fetchedFiles);
       fetchedFiles.forEach(x => {
         if (state.checkedFiles.findIndex(y => y === x) === -1) {
           state.checkedFiles.push(x);
@@ -128,6 +124,7 @@ const fileSorter = (f1: FileData, f2: FileData): number => f2.created.localeComp
 export const selectAllFiles = (state: RootState) => normalizedObjectsGetAll(state.files, fileSorter);
 export const selectAllFileIds = (state: RootState) => state.files.ids;
 export const selectAllCheckedFiles = (state: RootState) => state.files.checkedFiles;
+export const selectSelectedFile = (state: RootState) => state.files.selectedFile;
 
 export const {fileChecked, fileUnchecked, fileAllUnchecked} = filesSlice.actions;
 

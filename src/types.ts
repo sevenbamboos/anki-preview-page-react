@@ -23,6 +23,7 @@ export type CardData = CardDTO & {
 };
 
 export type GroupData = {
+  id: string,
   name: string, 
   new: boolean, 
   previewCards: CardData[]
@@ -51,6 +52,7 @@ export type FetchStatus =
   typeof statusSucceeded | 
   typeof statusFailed;
 
+export type MessageHandler = (message: string) => void;
 // export type Failure = {
 //   error: string
 // }

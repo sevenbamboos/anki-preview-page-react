@@ -54,6 +54,6 @@ type FileUploadTimeProps = {
 
 export const FileUploadTime = ({dateIOSString}: FileUploadTimeProps) => (
   <FileUploadTimeSpan>
-    {new Date(dateIOSString).toTimeString()}
+    {new Date(dateIOSString).toLocaleTimeString()}
   </FileUploadTimeSpan>
 );

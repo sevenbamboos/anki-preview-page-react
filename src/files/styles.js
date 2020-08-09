@@ -35,7 +35,7 @@ export const FileItem = styled.li`
 
   &:hover{
     cursor: pointer;
-    text-decoration: underline;
+    background: #eeeeee;
   }
 
   &:before{

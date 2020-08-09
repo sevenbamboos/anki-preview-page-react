@@ -1,5 +1,4 @@
-import {setErrorState, setMessageState, MessageErrorType} from '../utils/error-message';
-import {CardData, HasError, QA} from '../types';
+import {CardData, HasError, QA, MessageHandler} from '../types';
 
 export const EVENT_SWITCH_TAB = 'EVENT_SWITCH_TAB';
 
@@ -15,14 +14,12 @@ export const TABS = {
   TAB_CLOZE: 'Cloze' 
 };
 
-type CardState = MessageErrorType & {
-  tabName: string
+type CardState = {
+  tabName: string,
 };
 
 export const initState: CardState = {
-  tabName: TAB_BASIC,
-  message: null,
-  error: null,
+  tabName: TAB_BASIC
 };
 
 export function isCurrentTab(state: CardState, tabName: string) {
@@ -51,14 +48,20 @@ export function initTab(card: CardData): TAB_NAMES {
   else return TAB_SOURCE;
 }
 
-function switchTab(card: CardData, state: CardState, tabName: TAB_NAMES) {
+function switchTab(card: CardData, state: CardState, tabName: TAB_NAMES, onError: MessageHandler, onMessage: MessageHandler) {
   const currentTab = state.tabName;
   if (tabName === currentTab) return state;
 
-  if (tabName === TAB_BASIC && !card.forBasic) return setErrorState(state, 'Not For Basic');
-  else if (tabName === TAB_CLOZE && !card.forCloze) return setErrorState(state, 'Not For Cloze');
-
-  return {...setMessageState(state, `Switch To Tab ${TABS[tabName]}`), tabName};
+  if (tabName === TAB_BASIC && !card.forBasic) {
+    onError('Not For Basic');
+    return state;
+  } else if (tabName === TAB_CLOZE && !card.forCloze) {
+    onError('Not For Cloze');
+    return state;
+  } else {
+    onMessage(`Switch To Tab ${TABS[tabName]}`);
+    return {...state, tabName};
+  }
 }
 
 export type CardAction = {
@@ -66,14 +69,16 @@ export type CardAction = {
   payload: TAB_NAMES
 };
 
-export const cardReducer = (card: CardData) => (state: CardState, action: CardAction) => {
+export const cardReducer = (card: CardData, onError: MessageHandler, onMessage: MessageHandler) => (state: CardState, action: CardAction) => {
   switch (action.type) {
 
     case EVENT_SWITCH_TAB: {
       return switchTab(
         card,
         state, 
-        action.payload);
+        action.payload,
+        onError,
+        onMessage);
     }
 
     default: {

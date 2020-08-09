@@ -1,17 +1,21 @@
-import { parseBasic, parseCloze, isCardParseError } from './card/card-utils';
-import {CardDTO, CardData, GroupData, EQA, OutputResult} from './types';
-import {MessageErrorType} from './utils/error-message';
+import {GroupData, OutputResult} from '../types';
 import { configureStore } from '@reduxjs/toolkit';
-import filesReducer, {FilesState} from './files/files-slice';
+import globalReducer, {GlobalState} from './app-slice';
+import filesReducer, {FilesState} from '../files/files-slice';
+import groupsReducer, {GroupsState } from '../groups/groups-slice';
 
 export default configureStore({
   reducer: {
-    files: filesReducer
+    files: filesReducer,
+    groups: groupsReducer,
+    global: globalReducer
   }
 });
 
 export type RootState = {
-  files: FilesState
+  files: FilesState,
+  groups: GroupsState,
+  global: GlobalState
 };
 
 export const SET_FILES = 'SET_FILES';
@@ -29,7 +33,7 @@ export const CLEAR_OUTPUT_RESULT = 'CLEAR_OUTPUT_RESULT';
 export const CLEAR_ALL_FILES = 'CLEAR_ALL_FILES';
 export const AFTER_UPLOAD = 'AFTER_UPLOAD';
 
-export type AppState = MessageErrorType & {
+type AppState = {
   files: string[],
   selectedFile: string | null,
   selectedGroup: GroupData | null,
@@ -38,58 +42,12 @@ export type AppState = MessageErrorType & {
 };
 
 export const initState: AppState = {
-  message: null, 
-  error: null, 
   files: [],
   selectedFile: null,
   selectedGroup: null,
   checkedFiles: [],
   outputResult: null,
 };
-
-function convertGroup(group: GroupData) {
-  if (!group || !group.previewCards) return group;
-
-  group.previewCards = group.previewCards.map(c => convertCard(c));
-  return group;
-}
-
-function isCardData(card: any): card is CardData {
-  return card.clozeData && card.basicData;
-}
-
-function convertCard(card: CardDTO | CardData): CardData {
-
-  if (!card) return card;
-
-  if (card.error) return {...card, clozeData: null, basicData: null};
-
-  if (isCardData(card)) return card;
-
-  let clozeData: EQA | null = null;
-  if (card.forCloze && card.cloze) {
-    const result = parseCloze(card.cloze);
-    if (isCardParseError(result)) {
-      clozeData = {error: result[0]};
-    } else {
-      const [question, answer] = result[1];
-      clozeData = {question, answer};
-    }
-  }
-
-  let basicData: EQA | null = null;
-  if (card.forBasic && card.basic) {
-    const result = parseBasic(card.basic);
-    if (isCardParseError(result)) {
-      basicData = {error: result[0]};
-    } else {
-      const [question, answer] = result[1];
-      basicData = {question, answer};
-    }
-  }
-
-  return {...card, clozeData, basicData};
-}
 
 function fileChecked(file: string, files: string[]) {
   if (!file || !files) return [false, -1];
@@ -144,7 +102,7 @@ export function appReducer(st: AppState, action: AppAction) {
       return {...st, selectedFile: null, selectedGroup: null, checkedFiles: [], /*files: [],*/ message: 'Files cleared'};
     }
     case SELECT_GROUP: {
-      return {...st, selectedGroup: convertGroup(action.payload)};
+      return {...st, selectedGroup: action.payload};
     }
     case UNSELECT_GROUP: {
       return {...st, selectedGroup: null};

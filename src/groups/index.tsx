@@ -1,10 +1,13 @@
-import React, {useReducer, useEffect, useContext} from 'react';
-import {groups as groupsService} from '../service';
+import React, {useReducer} from 'react';
 import * as ls from './styles';
 import * as store from './groups-store';
-import {useMessageAndError, MessageAndErrorContext} from '../utils/error-message';
 import Paginator from '../utils/paginator';
 import { GroupData } from '../types';
+import { useSelector, useDispatch} from 'react-redux';
+import { 
+  selectGroupsByFile
+} from './groups-slice';
+import { onError as onErrorAction, onMessage as onMessageAction } from '../app/app-slice';
 
 type GroupNewIndicatorProps = {
   isNew: boolean
@@ -31,27 +34,18 @@ type GroupsProp = {
 
 export default function Groups({fileName, groupsPerPage=12, onClose, onSelectGroup}: GroupsProp){
 
-  const [state, dispatcher] = useReducer(store.groupsReducer(groupsPerPage), store.initState);
-  const {onMessage, onError} = useContext(MessageAndErrorContext);
+  const dispatch = useDispatch();
+  const errorHandler = (s: string) => dispatch(onErrorAction(s));
+  const messageHandler = (s: string) => dispatch(onMessageAction(s))
 
-  useEffect(() => {
-    const abortController = new AbortController();
+  const groupsFromReduxStore = useSelector(selectGroupsByFile(fileName));
 
-    const getGroups = async () => {
-      try {
-        const groups = await groupsService(fileName);
-        dispatcher({type: store.SET_GROUPS, payload: groups});
-      } catch (err) {
-        onError(err);
-      }
-    };
-    getGroups();
-
-    return () => abortController.abort();
-    
-  }, [fileName, onError]);
-
-  useMessageAndError(state, onMessage, onError);
+  const groupProvider = () => groupsFromReduxStore ? groupsFromReduxStore[0].groups : [];
+  const [state, dispatcher] = useReducer(
+    store.groupsReducer(groupProvider, groupsPerPage, errorHandler, messageHandler), 
+    // store.initStateAction(store.initState, groupProvider, groupsPerPage, errorHandler)
+    store.initState
+  );
 
   if (!state.groupsOnPage) return null;
 

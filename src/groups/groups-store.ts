@@ -1,9 +1,7 @@
-import {setErrorState, setMessageState, MessageErrorType} from '../utils/error-message';
 import {navigateToPage, resetPage, NavigateToPageSuccessResult, ResetPageSuccessResult, ResetPageErrorResult} from '../utils/paginator-support';
-import {GroupData} from '../types';
+import {GroupData, MessageHandler} from '../types';
 
-type GroupsState = MessageErrorType & {
-  groups: GroupData[],
+type GroupsState = {
   selectedGroup: GroupData | null,
   filteredGroups: GroupData[],
   groupsOnPage: GroupData[],
@@ -13,14 +11,11 @@ type GroupsState = MessageErrorType & {
 };
 
 export const initState: GroupsState = {
-  groups: [],
   filteredGroups: [],
   groupsOnPage: [],
   page: 1,
   showNewOnly: true, // TODO put it into local storage
   totalPage: 0,
-  message: null,
-  error: null,
   selectedGroup: null,
 };
 
@@ -33,20 +28,29 @@ export const TOGGLE_SHOW_NEW = 'TOGGLE_SHOW_NEW';
 function getFilteredGroups(items: GroupData[], showNewOnly: boolean) {
   if (!showNewOnly) {
     return items;
+  } else if (!items) {
+    return [];
   } else {
     return items.filter(x => x.new);
   }
 }
 
-const onNavigateSuccess = (state: GroupsState) => 
+const errorHandler = (state: GroupsState, error: string, onError: MessageHandler) => {
+  onError(error);
+  return state;
+}
+
+const onNavigateSuccess = (state: GroupsState, onMessage: MessageHandler) => 
   ({message, page, currentItems: groupsOnPage}: NavigateToPageSuccessResult<GroupData, GroupsState>) => {
-    return {...setMessageState(state, message), page, groupsOnPage}; 
+    onMessage(message);
+    return {...state, page, groupsOnPage}; 
   };
 
-const itemsSupplier = (st: GroupsState) => () => getFilteredGroups(st.groups, st.showNewOnly);
+const itemsSupplier = (groupsProvider: GroupsProvider, st: GroupsState) => () => getFilteredGroups(groupsProvider(), st.showNewOnly);
 
-const onResetError = (st: GroupsState) => ({error, items, currentItems: groupsOnPage, page, totalPage}: ResetPageErrorResult<GroupData, GroupsState>) => {
-    return {...setErrorState(st, error), filteredGroups: items, groupsOnPage, page, totalPage};
+const onResetError = (st: GroupsState, onError: MessageHandler) => ({error, items, currentItems: groupsOnPage, page, totalPage}: ResetPageErrorResult<GroupData, GroupsState>) => {
+    onError(error);
+    return {...st, filteredGroups: items, groupsOnPage, page, totalPage};
   };
 
 const onResetSuccess = (st: GroupsState) => ({items, currentItems: groupsOnPage, page, totalPage}: ResetPageSuccessResult<GroupData, GroupsState>) => {
@@ -63,7 +67,13 @@ type GroupsAction = {
   payload: GroupData[]
 };
 
-export function groupsReducer(groupsPerPage: number) {
+type GroupsProvider = () => GroupData[];
+
+export const initStateAction = (state: GroupsState, groupsProvider: GroupsProvider, groupsPerPage: number, onError: MessageHandler) => {
+  return resetPage(itemsSupplier(groupsProvider, state), groupsPerPage, onResetError(state, onError), onResetSuccess(state));
+};
+
+export function groupsReducer(groupsProvider: GroupsProvider, groupsPerPage: number, onError: MessageHandler, onMessage: MessageHandler) {
 
   return function(state: GroupsState, action: GroupsAction) {
     switch (action.type) {
@@ -71,9 +81,9 @@ export function groupsReducer(groupsPerPage: number) {
       case SET_GROUPS: {
         const newState = {...state, groups: action.payload};
         return resetPage(
-          itemsSupplier(newState), 
+          itemsSupplier(groupsProvider, newState), 
           groupsPerPage,
-          onResetError(newState),
+          onResetError(newState, onError),
           onResetSuccess(newState)
         );
       }
@@ -85,8 +95,8 @@ export function groupsReducer(groupsPerPage: number) {
           () => state.filteredGroups,
           (p) => p+1, 
           () => 'Next Page',
-          (e) => setErrorState(state, e),
-          onNavigateSuccess(state)
+          (e) => errorHandler(state, e, onError),
+          onNavigateSuccess(state, onMessage)
         );
       }
 
@@ -97,8 +107,8 @@ export function groupsReducer(groupsPerPage: number) {
           () => state.filteredGroups,
           (p) => p-1, 
           () => 'Previous Page',
-          (e) => setErrorState(state, e),
-          onNavigateSuccess(state)
+          (e) => errorHandler(state, e, onError),
+          onNavigateSuccess(state, onMessage)
         );
       }
 
@@ -109,17 +119,17 @@ export function groupsReducer(groupsPerPage: number) {
           () => state.filteredGroups,
           () => action.payload, 
           (p) => `Page ${p}`,
-          (e) => setErrorState(state, e),
-          onNavigateSuccess(state)
+          (e) => errorHandler(state, e, onError),
+          onNavigateSuccess(state, onMessage)
         );
       }
 
       case TOGGLE_SHOW_NEW: {
         const newState = {...state, showNewOnly: !state.showNewOnly}
         return resetPage(
-          itemsSupplier(newState), 
+          itemsSupplier(groupsProvider, newState), 
           groupsPerPage,
-          onResetError(newState),
+          onResetError(newState, onError),
           onResetSuccess(newState)
         );
       }
