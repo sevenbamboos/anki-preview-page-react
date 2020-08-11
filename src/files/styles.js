@@ -35,7 +35,7 @@ export const FileItem = styled.li`
 
   &:hover{
     cursor: pointer;
-    text-decoration: underline;
+    background: #eeeeee;
   }
 
   &:before{
@@ -58,3 +58,7 @@ export const FileItemCheck = styled.input`
   margin: 8px 20px;
 `;
 
+export const FileUploadTimeSpan = styled.span`
+  font-size: 10px;
+  font-style: italic;
+`;

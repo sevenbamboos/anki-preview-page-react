@@ -69,7 +69,7 @@ function Groupcrumb({group, isLink=false}: GroupcrumbProps) {
 
 type BreadcrumbProps = {
   files: string[],
-  selectedFile: string | null,
+  selectedFile?: string,
   selectedGroup: GroupData | null
 };
 
@@ -100,9 +100,6 @@ export default function Breadcrumb({files, selectedFile, selectedGroup}: Breadcr
   } else if (!selectedGroup && !selectedFile && files.length > 0) {
     return (
       <React.Fragment></React.Fragment>
-      // <ls.BreadcrumbSection>
-      //   <Filescrumb />
-      // </ls.BreadcrumbSection>
     );
 
   } else {

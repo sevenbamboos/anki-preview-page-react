@@ -1,9 +1,10 @@
-import React, {useReducer, useState, useContext, ReactNode, Dispatch} from 'react';
+import React, {useReducer, useState, ReactNode, Dispatch} from 'react';
 import * as st from './styles';
 import { parseTags } from './card-utils';
 import * as store from './card-store';
-import {useMessageAndError, MessageAndErrorContext} from '../utils/error-message';
 import { CardData, EQA } from '../types';
+import { useDispatch } from 'react-redux'
+import { onError as onErrorAction, onMessage as onMessageAction } from '../app/app-slice';
 
 type TabBtnProps = {
   tabName: store.TAB_NAMES,
@@ -139,11 +140,13 @@ export default function Card({card}: CardProps) {
 
   const {forCloze, forBasic, tags, clozeData: cloze, basicData: basic, source} = card;
 
-  const [state, dispatcher] = useReducer(store.cardReducer(card), {...store.initState, tabName: store.initTab(card)});
-
-  const {onMessage, onError} = useContext(MessageAndErrorContext);
-
-  useMessageAndError(state, onMessage, onError);
+  const dispatch = useDispatch();
+  const errorHandler = (s: string) => dispatch(onErrorAction(s));
+  const messageHandler = (s: string) => dispatch(onMessageAction(s));
+  const [state, dispatcher] = useReducer(
+    store.cardReducer(card, errorHandler, messageHandler), 
+    {...store.initState, tabName: store.initTab(card)}
+  );
 
   let tagsContent = null;
   if (tags) {

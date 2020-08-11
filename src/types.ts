@@ -23,6 +23,7 @@ export type CardData = CardDTO & {
 };
 
 export type GroupData = {
+  id: string,
   name: string, 
   new: boolean, 
   previewCards: CardData[]
@@ -33,3 +34,36 @@ export type OutputResult = {
   clozeCards: string[],
   groups: string[],
 };
+
+export type NormalizedObjects<T> = {
+  ids: string[],
+  entities: {
+    [id: string]: T
+  }
+}
+
+export const statusIdle = 'idle';
+export const statusLoading = 'loading';
+export const statusSucceeded = 'succeeded';
+export const statusFailed = 'failed';
+export type FetchStatus = 
+  typeof statusIdle | 
+  typeof statusLoading | 
+  typeof statusSucceeded | 
+  typeof statusFailed;
+
+export type MessageHandler = (message: string) => void;
+// export type Failure = {
+//   error: string
+// }
+
+// export type Success<T> = {
+//   value: T
+// }
+
+// export type Tryable<T> = Success<T> | Failure
+
+// export type FetchState<T> = {
+//   loading: boolean,
+//   result: Tryable<T> 
+// };

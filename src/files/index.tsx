@@ -1,5 +1,5 @@
 import React, {useState, ReactNode} from 'react';
-import { FilesContainer, FilesHeading, FileList, FileItem, FileItemLink, FileItemCheck } from './styles';
+import { FilesContainer, FilesHeading, FileList, FileItem, FileItemLink, FileItemCheck, FileUploadTimeSpan } from './styles';
 
 type FilesProps = {
   children: ReactNode
@@ -24,10 +24,11 @@ type CheckEvent = {
 type FileProps = {
   file: string,
   onSelect: (f: string) => void,
-  onCheck: (evt: CheckEvent) => void
+  onCheck: (evt: CheckEvent) => void,
+  children?: ReactNode
 };
 
-export const File = ({file, onSelect, onCheck}: FileProps) => {
+export const File = ({file, onSelect, onCheck, children}: FileProps) => {
 
   const [selected, setSelected] = useState(true);
 
@@ -41,7 +42,18 @@ export const File = ({file, onSelect, onCheck}: FileProps) => {
       <FileItemLink onClick={() => onSelect(file)}>
       {file}
       </FileItemLink>
+      {children}
       <FileItemCheck type="checkbox" checked={selected} onChange={handleCheck} />
     </FileItem>
   );
 };
+
+type FileUploadTimeProps = {
+  dateIOSString: string
+};
+
+export const FileUploadTime = ({dateIOSString}: FileUploadTimeProps) => (
+  <FileUploadTimeSpan>
+    {new Date(dateIOSString).toLocaleTimeString()}
+  </FileUploadTimeSpan>
+);

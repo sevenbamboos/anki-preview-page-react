@@ -1,10 +1,13 @@
-import React, {useReducer, useEffect, useContext} from 'react';
-import {groups as groupsService} from '../service';
+import React, {useReducer, useEffect} from 'react';
 import * as ls from './styles';
 import * as store from './groups-store';
-import {useMessageAndError, MessageAndErrorContext} from '../utils/error-message';
 import Paginator from '../utils/paginator';
 import { GroupData } from '../types';
+import { useSelector, useDispatch} from 'react-redux';
+import { 
+  selectGroupsByFile
+} from './groups-slice';
+import { onError as onErrorAction, onMessage as onMessageAction } from '../app/app-slice';
 
 type GroupNewIndicatorProps = {
   isNew: boolean
@@ -31,27 +34,19 @@ type GroupsProp = {
 
 export default function Groups({fileName, groupsPerPage=12, onClose, onSelectGroup}: GroupsProp){
 
-  const [state, dispatcher] = useReducer(store.groupsReducer(groupsPerPage), store.initState);
-  const {onMessage, onError} = useContext(MessageAndErrorContext);
+  const dispatch = useDispatch();
+  const errorHandler = (s: string) => dispatch(onErrorAction(s));
+  const messageHandler = (s: string) => dispatch(onMessageAction(s))
+
+  const groupsFromReduxStore = useSelector(selectGroupsByFile(fileName));
+  const [state, dispatcher] = useReducer(
+    store.groupsReducer(groupsFromReduxStore, groupsPerPage, errorHandler, messageHandler),
+    store.initState
+  );
 
   useEffect(() => {
-    const abortController = new AbortController();
-
-    const getGroups = async () => {
-      try {
-        const groups = await groupsService(fileName);
-        dispatcher({type: store.SET_GROUPS, payload: groups});
-      } catch (err) {
-        onError(err);
-      }
-    };
-    getGroups();
-
-    return () => abortController.abort();
-    
-  }, [fileName, onError]);
-
-  useMessageAndError(state, onMessage, onError);
+    dispatcher({type: store.SET_GROUPS, payload: groupsFromReduxStore}); 
+  }, [dispatcher, groupsFromReduxStore]);
 
   if (!state.groupsOnPage) return null;
 

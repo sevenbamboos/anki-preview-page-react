@@ -1,8 +1,7 @@
-import {setErrorState, setMessageState, MessageErrorType} from '../utils/error-message';
 import {navigateToPage, NavigateToPageSuccessResult} from '../utils/paginator-support';
-import {CardData} from '../types';
+import {CardData, MessageHandler} from '../types';
 
-type CardsState = MessageErrorType & {
+type CardsState = {
   page: number,
   card: CardData | null,
   currentItems: CardData[]
@@ -10,8 +9,6 @@ type CardsState = MessageErrorType & {
 
 export const initState: CardsState = {
   page: 1,
-  message: null,
-  error: null,
   card: null,
   currentItems: []
 };
@@ -27,12 +24,18 @@ type CardsAction = {
   payload: number
 };
 
-const onNavigateSuccess = (state: CardsState) => 
+const onNavigateSuccess = (state: CardsState, onMessage: MessageHandler) => 
   ({message, page, currentItems: [card]}: NavigateToPageSuccessResult<CardData, CardsState>): CardsState => {
-    return {...setMessageState(state, message), page, card}; 
+    onMessage(message);
+    return {...state, page, card}; 
   };
 
-export const cardsReducer = (cards: CardData[]) => (state: CardsState, action: CardsAction): CardsState => {
+const errorHandler = (state: CardsState, error: string, onError: MessageHandler) => {
+  onError(error);
+  return state;
+}
+
+export const cardsReducer = (cards: CardData[], onError: MessageHandler, onMessage: MessageHandler) => (state: CardsState, action: CardsAction): CardsState => {
   switch (action.type) {
 
     case NEXT_PAGE: {
@@ -42,8 +45,8 @@ export const cardsReducer = (cards: CardData[]) => (state: CardsState, action: C
         () => cards,
         (p) => p+1, 
         () => 'Next Card',
-        (e) => setErrorState(state, e),
-        onNavigateSuccess(state)
+        (e) => errorHandler(state, e, onError),
+        onNavigateSuccess(state, onMessage)
       );
 
     }
@@ -55,8 +58,8 @@ export const cardsReducer = (cards: CardData[]) => (state: CardsState, action: C
         () => cards,
         (p) => p-1, 
         () => 'Previous Card',
-        (e) => setErrorState(state, e),
-        onNavigateSuccess(state)
+        (e) => errorHandler(state, e, onError),
+        onNavigateSuccess(state, onMessage)
       );
     }
 
@@ -67,8 +70,8 @@ export const cardsReducer = (cards: CardData[]) => (state: CardsState, action: C
         () => cards,
         (p) => action.payload, 
         (p) => `Card ${p}`,
-        (e) => setErrorState(state, e),
-        onNavigateSuccess(state)
+        (e) => errorHandler(state, e, onError),
+        onNavigateSuccess(state, onMessage)
       );
     }
 

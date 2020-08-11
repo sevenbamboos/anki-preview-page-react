@@ -1,11 +1,12 @@
-import React, {useReducer, useContext} from 'react';
+import React, {useReducer} from 'react';
 import * as st from './styles';
 import {GroupNewIndicator} from '../groups';
 import Card from '../card';
 import * as store from './cards-store';
-import {useMessageAndError, MessageAndErrorContext} from '../utils/error-message';
 import Paginator from '../utils/paginator';
 import {GroupData} from '../types';
+import { useDispatch } from 'react-redux'
+import { onError as onErrorAction, onMessage as onMessageAction } from '../app/app-slice';
 
 type CardsProps = {
   group: GroupData,
@@ -14,10 +15,14 @@ type CardsProps = {
 
 export default function Cards({group: {name, new: isNew, previewCards: cards}, onClose}: CardsProps) {
 
-  const [state, dispatcher] = useReducer(store.cardsReducer(cards), {...store.initState, card: cards[0]});
-  const {onMessage, onError} = useContext(MessageAndErrorContext);
+  const dispatch = useDispatch();
+  const errorHandler = (s: string) => dispatch(onErrorAction(s));
+  const messageHandler = (s: string) => dispatch(onMessageAction(s));
 
-  useMessageAndError(state, onMessage, onError);
+  const [state, dispatcher] = useReducer(
+    store.cardsReducer(cards, errorHandler, messageHandler), 
+    {...store.initState, card: cards[0]}
+  );
 
   const paginatorProps = {
     pageIndex: Math.min(state.page, cards.length),

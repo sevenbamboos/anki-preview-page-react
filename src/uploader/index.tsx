@@ -1,7 +1,8 @@
 
-import React, {useState, useCallback, useEffect, useContext} from 'react';
+import React, {useState, useCallback, useEffect} from 'react';
 import {LoadingIndicator, FileInput} from './styles';
-import {MessageAndErrorContext} from '../utils/error-message';
+import { useDispatch } from 'react-redux';
+import { onError as onErrorAction, onMessage as onMessageAction } from '../app/app-slice';
 
 type UploaderProps = {
   doUpload: (file: File) => Promise<void>;
@@ -10,9 +11,11 @@ type UploaderProps = {
 type UploaderFile = File | null;
 
 function Uploader({doUpload}: UploaderProps) {
+
+  const dispatch = useDispatch();
+
   const [file, setFile] = useState<UploaderFile>(null);
   const [isUploading, setUploading] = useState(false);
-  const {onMessage, onError} = useContext(MessageAndErrorContext);
 
   const onUpload = useCallback(async () => {
     if (!file) return;
@@ -20,14 +23,14 @@ function Uploader({doUpload}: UploaderProps) {
     setUploading(true);
     try {
       await doUpload(file);
-      onMessage('Upload Successfully');
+      dispatch(onMessageAction('Upload Successfully'));
     } catch(err) {
-      onError(err);
+      dispatch(onErrorAction(err));
     } finally {
       setUploading(false);
       setFile(null);
     }
-  }, [file, doUpload, onMessage, onError]);
+  }, [file, doUpload, dispatch]);
 
   useEffect(() => {
     onUpload();
