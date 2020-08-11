@@ -14,7 +14,8 @@ import {
   normalizedObjectsAdd,
   normalizedObjectsFindAll,
   normalizedObjectsContains,
-  normalizedObjectsGet
+  normalizedObjectsGet,
+  normalizedObjectsClear
 } from '../common';
 
 import {groups as groupsService} from '../service';
@@ -113,6 +114,9 @@ const groupsSlice = createSlice({
   name: 'groups',
   initialState,
   reducers: {
+    reset(state) {
+      normalizedObjectsClear(state);
+    }
   },
   extraReducers: builder => {
 
@@ -141,7 +145,12 @@ const groupsSlice = createSlice({
 
 const findByFile = (fileName: string) => (g: GroupsData): boolean => g.id === fileName;
 
-export const selectGroupsByFile = (fileName: string) => (state: RootState) => normalizedObjectsFindAll(state.groups, findByFile(fileName));
+export const selectGroupsByFile = (fileName: string) => (state: RootState): GroupData[] => {
+  const groupsSet = normalizedObjectsFindAll(state.groups, findByFile(fileName));
+  return groupsSet && groupsSet.length ? groupsSet[0].groups : [];
+}
 export const selectSelectedGroups = (state: RootState) => state.groups.selectedGroups;
+
+export const { reset } = groupsSlice.actions;
 
 export default groupsSlice.reducer;

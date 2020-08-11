@@ -1,4 +1,4 @@
-import React, {useReducer} from 'react';
+import React, {useReducer, useEffect} from 'react';
 import * as ls from './styles';
 import * as store from './groups-store';
 import Paginator from '../utils/paginator';
@@ -39,13 +39,14 @@ export default function Groups({fileName, groupsPerPage=12, onClose, onSelectGro
   const messageHandler = (s: string) => dispatch(onMessageAction(s))
 
   const groupsFromReduxStore = useSelector(selectGroupsByFile(fileName));
-
-  const groupProvider = () => groupsFromReduxStore ? groupsFromReduxStore[0].groups : [];
   const [state, dispatcher] = useReducer(
-    store.groupsReducer(groupProvider, groupsPerPage, errorHandler, messageHandler), 
-    // store.initStateAction(store.initState, groupProvider, groupsPerPage, errorHandler)
+    store.groupsReducer(groupsFromReduxStore, groupsPerPage, errorHandler, messageHandler),
     store.initState
   );
+
+  useEffect(() => {
+    dispatcher({type: store.SET_GROUPS, payload: groupsFromReduxStore}); 
+  }, [dispatcher, groupsFromReduxStore]);
 
   if (!state.groupsOnPage) return null;
 

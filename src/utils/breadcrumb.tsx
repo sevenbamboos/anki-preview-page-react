@@ -69,7 +69,7 @@ function Groupcrumb({group, isLink=false}: GroupcrumbProps) {
 
 type BreadcrumbProps = {
   files: string[],
-  selectedFile: string | null,
+  selectedFile?: string,
   selectedGroup: GroupData | null
 };
 

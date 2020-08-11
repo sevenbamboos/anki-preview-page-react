@@ -46,7 +46,7 @@ const onNavigateSuccess = (state: GroupsState, onMessage: MessageHandler) =>
     return {...state, page, groupsOnPage}; 
   };
 
-const itemsSupplier = (groupsProvider: GroupsProvider, st: GroupsState) => () => getFilteredGroups(groupsProvider(), st.showNewOnly);
+const itemsSupplier = (groups: GroupData[], st: GroupsState) => () => getFilteredGroups(groups, st.showNewOnly);
 
 const onResetError = (st: GroupsState, onError: MessageHandler) => ({error, items, currentItems: groupsOnPage, page, totalPage}: ResetPageErrorResult<GroupData, GroupsState>) => {
     onError(error);
@@ -67,13 +67,7 @@ type GroupsAction = {
   payload: GroupData[]
 };
 
-type GroupsProvider = () => GroupData[];
-
-export const initStateAction = (state: GroupsState, groupsProvider: GroupsProvider, groupsPerPage: number, onError: MessageHandler) => {
-  return resetPage(itemsSupplier(groupsProvider, state), groupsPerPage, onResetError(state, onError), onResetSuccess(state));
-};
-
-export function groupsReducer(groupsProvider: GroupsProvider, groupsPerPage: number, onError: MessageHandler, onMessage: MessageHandler) {
+export function groupsReducer(groups: GroupData[], groupsPerPage: number, onError: MessageHandler, onMessage: MessageHandler) {
 
   return function(state: GroupsState, action: GroupsAction) {
     switch (action.type) {
@@ -81,9 +75,9 @@ export function groupsReducer(groupsProvider: GroupsProvider, groupsPerPage: num
       case SET_GROUPS: {
         const newState = {...state, groups: action.payload};
         return resetPage(
-          itemsSupplier(groupsProvider, newState), 
+          itemsSupplier(groups, newState), 
           groupsPerPage,
-          onResetError(newState, onError),
+          onResetError(newState, (_) => {} /* do no error handling because it will trigger update to app component which causes infinite render */),
           onResetSuccess(newState)
         );
       }
@@ -127,7 +121,7 @@ export function groupsReducer(groupsProvider: GroupsProvider, groupsPerPage: num
       case TOGGLE_SHOW_NEW: {
         const newState = {...state, showNewOnly: !state.showNewOnly}
         return resetPage(
-          itemsSupplier(groupsProvider, newState), 
+          itemsSupplier(groups, newState), 
           groupsPerPage,
           onResetError(newState, onError),
           onResetSuccess(newState)

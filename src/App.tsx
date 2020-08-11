@@ -36,6 +36,7 @@ import {
 
 import {
   selectSelectedGroups,
+  reset as resetGroupsAction,
   fetchGroups as fetchGroupsAction,
 } from './groups/groups-slice';
 
@@ -74,6 +75,7 @@ function App() {
 
     try {
       const result = await outputsService(fileNames);
+      dispatch(resetGroupsAction());
       dispatch(clearFilesAction());
       dispatcher({type: store.SET_OUTPUT_RESULT, payload: result});
       gotoHome();
@@ -200,7 +202,7 @@ function App() {
             <OutputBtn onOutput={() => output(checkedFileIdsFromReduxStore)} />
           </Toolbar>
 
-          <Breadcrumb files={fileIdsFromReduxStore} selectedFile={state.selectedFile} selectedGroup={state.selectedGroup} />
+          <Breadcrumb files={fileIdsFromReduxStore} selectedFile={selectedGroupsFromReduxStore} selectedGroup={state.selectedGroup} />
 
           <Switch>
             <Route path='/group' render={() => renderGroup(state.selectedGroup)} />

@@ -1,5 +1,6 @@
 import {GroupData, OutputResult} from '../types';
 import { configureStore } from '@reduxjs/toolkit';
+import thunk from 'redux-thunk';
 import globalReducer, {GlobalState} from './app-slice';
 import filesReducer, {FilesState} from '../files/files-slice';
 import groupsReducer, {GroupsState } from '../groups/groups-slice';
@@ -9,7 +10,8 @@ export default configureStore({
     files: filesReducer,
     groups: groupsReducer,
     global: globalReducer
-  }
+  },
+  middleware: [thunk]
 });
 
 export type RootState = {
