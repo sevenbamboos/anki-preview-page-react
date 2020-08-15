@@ -1,6 +1,6 @@
 {
   "name": "anki-preview-page-react",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "private": true,
   "dependencies": {
     "@reduxjs/toolkit": "^1.4.0",

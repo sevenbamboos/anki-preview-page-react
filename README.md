@@ -1,3 +1,24 @@
+# Overview
+
+Flash Card Preview & Generation
+
+## Input
+Questions in Markdown
+
+## Output
+Basic question-answer cards and clozing cards
+
+## Language 
+ * Typescript
+
+## Library
+ * React
+ * Styled-components
+ * Redux
+ * Redux-thunk
+ * React-router
+ * Jest
+
 # Component Design
 
 ![Image of Component Design](https://github.com/sevenbamboos/anki-preview-page-react/blob/master/design/components-design.png)
