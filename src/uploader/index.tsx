@@ -25,7 +25,7 @@ function Uploader({doUpload}: UploaderProps) {
       await doUpload(file);
       dispatch(onMessageAction('Upload Successfully'));
     } catch(err) {
-      dispatch(onErrorAction(err));
+      dispatch(onErrorAction(String(err)));
     } finally {
       setUploading(false);
       setFile(null);

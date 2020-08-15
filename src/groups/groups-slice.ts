@@ -167,9 +167,7 @@ const groupsSlice = createSlice({
     });
 
     builder.addCase(parseGroups.rejected, (state, action) => {
-      if (action.payload) {
-        const {id} = action.payload as GroupsData; 
-      } else {
+      if (!action.payload) {
         state.status = statusFailed;
       }
     });
