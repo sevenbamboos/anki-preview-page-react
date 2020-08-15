@@ -41,6 +41,10 @@ const initialState: GroupsState = {
   }
 };
 
+type FileName = {
+  fileName: string,
+}
+
 type FileNameWithHistory = {
   fileName: string,
   history: History
@@ -56,6 +60,17 @@ export const fetchGroups = createAsyncThunk('files/fetchGroups', async ({fileNam
 
   const groups = await groupsService(fileName);
   history.push('/groups');
+  return {id: fileName, groups};
+});
+
+export const parseGroups = createAsyncThunk('files/parseGroups', async ({fileName}: FileName, {getState, rejectWithValue}) => {
+  const groupsState = (getState() as RootState).groups;
+
+  if (normalizedObjectsContains(groupsState, fileName)) {
+    return rejectWithValue({...normalizedObjectsGet(groupsState, fileName)});
+  }
+
+  const groups = await groupsService(fileName);
   return {id: fileName, groups};
 });
 
@@ -136,6 +151,24 @@ const groupsSlice = createSlice({
       if (action.payload) {
         const {id} = action.payload as GroupsData; 
         state.selectedGroups = id;
+      } else {
+        state.status = statusFailed;
+      }
+    });
+
+    builder.addCase(parseGroups.pending, (state) => {
+      state.status = statusLoading;
+    });
+
+    builder.addCase(parseGroups.fulfilled, (state, action) => {
+      state.status = statusSucceeded;
+      const {id, groups} = action.payload;
+      normalizedObjectsAdd<GroupsData, GroupsData>(state, groupsMapper, groupsDataToId, groupsPostProcessor, {id, groups});
+    });
+
+    builder.addCase(parseGroups.rejected, (state, action) => {
+      if (action.payload) {
+        const {id} = action.payload as GroupsData; 
       } else {
         state.status = statusFailed;
       }

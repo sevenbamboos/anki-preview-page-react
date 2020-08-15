@@ -1,7 +1,7 @@
 import React, {useReducer, useCallback} from 'react';
 import { GlobalStyle, Title, Container, UploaderWrapper, Splitter } from './styles';
 import { Toolbar } from './toolbar/styles';
-import {ClearBtn, OutputBtn, FilesBtn} from './toolbar';
+import {ClearBtn, OutputBtn, FilesBtn, ReloadBtn} from './toolbar';
 import Uploader from './uploader';
 import {
   upload as uploadService, 
@@ -9,7 +9,7 @@ import {
 } from './service';
 import Breadcrumb from './utils/breadcrumb';
 import {InfoDialog, OutputResultSummary, ErrorBar, MessageBar} from './utils/widgets';
-import {Files, File, FileUploadTime} from './files';
+import {Files, File, FileUploadTime, FileMetaInfo} from './files';
 import Groups from './groups';
 import Cards from './cards';
 import * as store from './app/app-store';
@@ -38,6 +38,7 @@ import {
   selectSelectedGroups,
   reset as resetGroupsAction,
   fetchGroups as fetchGroupsAction,
+  parseGroups as parseGroupsAction
 } from './groups/groups-slice';
 
 import {
@@ -63,9 +64,15 @@ function App() {
   const selectedGroupsFromReduxStore = useSelector(selectSelectedGroups);
 
   const clearFiles = useCallback(async () => {
+    dispatch(resetGroupsAction());
     dispatch(clearFilesAction());
     gotoHome();
   }, [gotoHome, dispatch]);
+
+  const reloadFiles = useCallback(async () => {
+    dispatch(fetchFilesAction());
+    gotoFiles();
+  }, [gotoFiles, dispatch]);
 
   const output = useCallback(async (fileNames) => {
     if (!fileNames || fileNames.length === 0) {
@@ -97,6 +104,10 @@ function App() {
   const onSelectFile = useCallback((file) => {
     dispatch(fetchGroupsAction({fileName: file, history}));
   }, [dispatch, history]);
+
+  const onParseFile = useCallback((file) => {
+    dispatch(parseGroupsAction({fileName: file}));
+  }, [dispatch]);
 
   const onUnSelectFile = useCallback(() => {
     dispatcher({type: store.UNSELECT_FILE});
@@ -180,6 +191,7 @@ function App() {
           {files.map(f =>
             <File key={f.id} file={f.id} onSelect={onSelectFile} onCheck={onCheckFile}>
               <FileUploadTime dateIOSString={f.created}/>
+              <FileMetaInfo file={f.id} onReload={onParseFile} />
             </File>
           )}
         </Files>
@@ -197,6 +209,7 @@ function App() {
             <UploaderWrapper>
               <Uploader doUpload={doUpload} />
             </UploaderWrapper>
+            <ReloadBtn onReload={reloadFiles} />
             <FilesBtn files={fileIdsFromReduxStore} />
             <ClearBtn onClear={clearFiles} fileCount={fileIdsFromReduxStore.length} />
             <OutputBtn onOutput={() => output(checkedFileIdsFromReduxStore)} />
