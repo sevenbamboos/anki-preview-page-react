@@ -1,13 +1,19 @@
 import {navigateToPage, resetPage, NavigateToPageSuccessResult, ResetPageSuccessResult, ResetPageErrorResult} from '../utils/paginator-support';
 import {GroupData, MessageHandler} from '../types';
 
+export const VIEW_MODE_CARDS = 'cards';
+export const VIEW_MODE_CHART = 'chart';
+
+type ViewModeType = typeof VIEW_MODE_CARDS | typeof VIEW_MODE_CHART;
+
 type GroupsState = {
   selectedGroup: GroupData | null,
   filteredGroups: GroupData[],
   groupsOnPage: GroupData[],
   page: number,
   totalPage: number,
-  showNewOnly: boolean
+  showNewOnly: boolean,
+  viewMode: ViewModeType
 };
 
 export const initState: GroupsState = {
@@ -17,6 +23,7 @@ export const initState: GroupsState = {
   showNewOnly: true, // TODO put it into local storage
   totalPage: 0,
   selectedGroup: null,
+  viewMode: VIEW_MODE_CARDS
 };
 
 export const SET_GROUPS = 'SET_GROUPS';
@@ -24,6 +31,7 @@ export const NEXT_PAGE = 'NEXT_PAGE';
 export const PREV_PAGE = 'PREV_PAGE';
 export const GOTO_PAGE = 'GOTO_PAGE';
 export const TOGGLE_SHOW_NEW = 'TOGGLE_SHOW_NEW';
+export const TOGGLE_VIEW_MODE = 'TOGGLE_VIEW_MODE';
 
 function getFilteredGroups(items: GroupData[], showNewOnly: boolean) {
   if (!showNewOnly) {
@@ -58,7 +66,7 @@ const onResetSuccess = (st: GroupsState) => ({items, currentItems: groupsOnPage,
 };
 
 type GroupsAction = {
-  type: typeof NEXT_PAGE | typeof PREV_PAGE | typeof TOGGLE_SHOW_NEW
+  type: typeof NEXT_PAGE | typeof PREV_PAGE | typeof TOGGLE_SHOW_NEW | typeof TOGGLE_VIEW_MODE
 } | {
   type: typeof GOTO_PAGE,
   payload: number
@@ -126,6 +134,11 @@ export function groupsReducer(groups: GroupData[], groupsPerPage: number, onErro
           onResetError(newState, onError),
           onResetSuccess(newState)
         );
+      }
+
+      case TOGGLE_VIEW_MODE: {
+        const viewMode: ViewModeType = state.viewMode === VIEW_MODE_CARDS ? VIEW_MODE_CHART : VIEW_MODE_CARDS;
+        return {...state, viewMode};
       }
 
       default: {
