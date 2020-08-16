@@ -18,6 +18,7 @@ Basic question-answer cards and clozing cards
  * Redux-thunk
  * React-router
  * Jest
+ * D3.js
 
 # Component Design
 
@@ -42,3 +43,5 @@ Check questions of a card:
 Check the question in clozing format:
 ![Card View Clozing](https://github.com/sevenbamboos/anki-preview-page-react/blob/master/design/card-clozing.png)
 
+Card report shows the numbers of clozing/basic cards:
+![Card Report](https://github.com/sevenbamboos/anki-preview-page-react/blob/master/design/card-report.png)

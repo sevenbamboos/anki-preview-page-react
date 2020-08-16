@@ -1,6 +1,16 @@
 import styled from 'styled-components';
 import cardsPNG from '../cards.png';
 import {Close} from '@styled-icons/material';
+import {LineChart} from '@styled-icons/boxicons-regular/LineChart';
+import {ReturnDownBack} from '@styled-icons/ionicons-sharp/ReturnDownBack';
+
+export const GoBackIcon = styled(ReturnDownBack)`
+  width: 15px;
+`;
+
+export const ChartIcon = styled(LineChart)`
+  width: 15px;
+`;
 
 export const CloseIcon = styled(Close)`
   color: black;
@@ -14,6 +24,46 @@ export const GroupsContainer = styled.div`
   margin-left:  auto;
   width: 500px;
   max-width: 960px;
+`;
+
+export const GroupsChartContainer = styled.div`
+`;
+
+export const GroupsChartHeader = styled.div`
+  margin: 10px 5px 0px;
+`;
+
+export const GroupsChartContents = styled.div`
+  overflow: scroll;
+  height: 350px;
+  margin: 15px 5px;
+`;
+
+export const GroupsChartLegendTotal = styled.span`
+  margin-left: 5px;
+  padding: 5px;
+  background-color: green;
+  font-size: 10px;
+  font-weight: 500;
+  color: white;
+`;
+
+export const GroupsChartLegendClozing = styled.span`
+  margin-left: 5px;
+  padding: 5px;
+  background-color: blue;
+  font-size: 10px;
+  font-weight: 500;
+  color: white;
+`;
+
+export const GroupsChartLegendBasic = styled.span`
+  margin-left: 5px;
+  padding: 5px;
+  background-color: red;
+  font-size: 10px;
+  font-weight: 500;
+  color: white;
 `;
 
 export const GroupsHeading = styled.h2`

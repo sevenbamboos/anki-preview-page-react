@@ -1,4 +1,5 @@
-import React, {useReducer, useEffect} from 'react';
+import React, {useReducer, useEffect, useCallback, useRef} from 'react';
+import { select, scaleLinear, extent } from "d3";
 import * as ls from './styles';
 import * as store from './groups-store';
 import Paginator from '../utils/paginator';
@@ -8,6 +9,7 @@ import {
   selectGroupsByFile
 } from './groups-slice';
 import { onError as onErrorAction, onMessage as onMessageAction } from '../app/app-slice';
+import GroupsChart from './groups-chart';
 
 type GroupNewIndicatorProps = {
   isNew: boolean
@@ -44,6 +46,10 @@ export default function Groups({fileName, groupsPerPage=12, onClose, onSelectGro
     store.initState
   );
 
+  const toggleViewMode = useCallback(() => {
+    dispatcher({type: store.TOGGLE_VIEW_MODE});
+  }, [dispatcher]);
+
   useEffect(() => {
     dispatcher({type: store.SET_GROUPS, payload: groupsFromReduxStore}); 
   }, [dispatcher, groupsFromReduxStore]);
@@ -71,10 +77,17 @@ export default function Groups({fileName, groupsPerPage=12, onClose, onSelectGro
     onLast: () => dispatcher({type: store.GOTO_PAGE, payload: state.totalPage}),
   };
 
-  return (
-    <ls.GroupsContainer>
+  let contents;
+  if (state.viewMode === store.VIEW_MODE_CARDS) {
+    contents = (
+      <>
       <ls.GroupsHeading>
-        <ls.GroupsHeadingText>{fileName}</ls.GroupsHeadingText>
+        {/* <ls.GroupsHeadingText>{fileName}</ls.GroupsHeadingText> */}
+        <ls.GroupsButton 
+          onClick={toggleViewMode}
+          title="To Charts">
+            <ls.ChartIcon/>    
+        </ls.GroupsButton> 
         <ls.GroupsHeadingText>{ state.filteredGroups.length } group(s)</ls.GroupsHeadingText>
         <ls.GroupsShowNewOnly htmlFor='toggleShowNewForGroups'>
           New Groups?
@@ -96,7 +109,41 @@ export default function Groups({fileName, groupsPerPage=12, onClose, onSelectGro
       </ls.GroupList>
 
       <Paginator {...paginatorProps} />
+      </>
+    );
 
+  } else if (state.viewMode === store.VIEW_MODE_CHART) {
+    contents = (
+      <>
+      <ls.GroupsHeading>
+        <ls.GroupsButton 
+          onClick={toggleViewMode}
+          title="To Cards">
+            <ls.GoBackIcon />
+        </ls.GroupsButton> 
+        <ls.GroupsHeadingText>
+          Card Report
+          <ls.GroupsChartLegendTotal>Total</ls.GroupsChartLegendTotal>
+          <ls.GroupsChartLegendClozing>Clozing</ls.GroupsChartLegendClozing>
+          <ls.GroupsChartLegendBasic>Basic</ls.GroupsChartLegendBasic>
+        </ls.GroupsHeadingText>
+        <ls.GroupsButton 
+          onClick={onClose}
+          title="Close">
+            <ls.CloseIcon/>    
+        </ls.GroupsButton>
+      </ls.GroupsHeading>
+
+      <ls.GroupsChartContainer>
+        <GroupsChart groups={groupsFromReduxStore} />
+      </ls.GroupsChartContainer>
+      </>
+    );
+  }
+
+  return (
+    <ls.GroupsContainer>
+      {contents}
     </ls.GroupsContainer>
   );
 };
