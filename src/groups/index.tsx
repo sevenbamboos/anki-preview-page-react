@@ -1,5 +1,4 @@
-import React, {useReducer, useEffect, useCallback, useRef} from 'react';
-import { select, scaleLinear, extent } from "d3";
+import React, {useReducer, useEffect, useCallback} from 'react';
 import * as ls from './styles';
 import * as store from './groups-store';
 import Paginator from '../utils/paginator';

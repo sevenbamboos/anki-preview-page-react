@@ -113,7 +113,7 @@ export default ({groups}: GroupsChartProp) => {
     const headerCanvas = createCanvas(groupsHeaderCanvasRef.current, width, 20);
     drawBars(groups, headerCanvas, canvas, width, height);
 
-  }, [groups]);
+  }, [groups, height]);
 
   return (
     <>
@@ -122,25 +122,5 @@ export default ({groups}: GroupsChartProp) => {
       <div ref={groupsHeaderCanvasRef}></div>
     </ls.GroupsChartHeader>
     </>
-  );
-};
-
-type BarProp = {
-  height: number,
-  width: number,
-  bgHeight: number,
-  x: number,
-  color: string
-};
-
-const Bar = ({height, width, bgHeight, x, color}: BarProp) => {
-  return (
-    <rect
-      x={x}
-      y={bgHeight-height}
-      width={width}
-      height={height}
-      fill={color}
-    />
   );
 };
