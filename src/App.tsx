@@ -82,14 +82,12 @@ function App() {
 
     try {
       const result = await outputsService(fileNames);
-      dispatch(resetGroupsAction());
-      dispatch(clearFilesAction());
       dispatcher({type: store.SET_OUTPUT_RESULT, payload: result});
       gotoHome();
     } catch (err) {
       dispatcher({type: store.SET_ERROR, payload: err.message});
     }
-  }, [gotoHome, dispatch])  
+  }, [gotoHome])  
 
   const doUpload = useCallback(async (file) => {
     try {
@@ -134,7 +132,9 @@ function App() {
 
   const onClearOutputResult = useCallback(() => {
     dispatcher({type: store.CLEAR_OUTPUT_RESULT});
-  }, []);
+    dispatch(resetGroupsAction());
+    dispatch(clearFilesAction());
+  }, [dispatch]);
 
   let outputResultPop = null;
   if (state.outputResult) {
