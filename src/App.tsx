@@ -1,7 +1,8 @@
 import React, {useReducer, useCallback} from 'react';
 import { GlobalStyle, Title, Container, UploaderWrapper, Splitter } from './styles';
 import { Toolbar } from './toolbar/styles';
-import {ClearBtn, OutputBtn, FilesBtn, ReloadBtn} from './toolbar';
+import {ClearBtn, OutputBtn, FilesBtn, ReloadBtn, SearchBtn} from './toolbar';
+import Search from './search';
 import Uploader from './uploader';
 import {
   upload as uploadService, 
@@ -17,7 +18,7 @@ import {version} from '../package.json';
 import {
   Switch,
   Route,
-  // Link,
+  Link,
   Redirect,
   useHistory
 } from 'react-router-dom';
@@ -209,6 +210,7 @@ function App() {
             <UploaderWrapper>
               <Uploader doUpload={doUpload} />
             </UploaderWrapper>
+            <Link to="/search"><SearchBtn searchCount={0} /></Link>
             <ReloadBtn onReload={reloadFiles} />
             <FilesBtn files={fileIdsFromReduxStore} />
             <ClearBtn onClear={clearFiles} fileCount={fileIdsFromReduxStore.length} />
@@ -221,6 +223,7 @@ function App() {
             <Route path='/group' render={() => renderGroup(state.selectedGroup)} />
             <Route path='/groups' render={() => renderGroups(selectedGroupsFromReduxStore)} />
             <Route path='/files' render={() => renderFiles(filesFromReduxStore)} />
+            <Route path='/search' render={() => <Search latestTerms={['test', 'abc']} />} />
             <Route path='/'><Splitter /></Route>
             <Redirect to='/' />
           </Switch>

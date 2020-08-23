@@ -1,4 +1,5 @@
 export type CardDTO = {
+  index: number,
   forCloze: boolean,
   forBasic: boolean, 
   tags: string, 

@@ -4,11 +4,13 @@ import thunk from 'redux-thunk';
 import globalReducer, {GlobalState} from './app-slice';
 import filesReducer, {FilesState} from '../files/files-slice';
 import groupsReducer, {GroupsState } from '../groups/groups-slice';
+import searchReducer, {SearchState } from '../search/search-slice';
 
 export default configureStore({
   reducer: {
     files: filesReducer,
     groups: groupsReducer,
+    search: searchReducer,
     global: globalReducer
   },
   middleware: [thunk]
@@ -17,6 +19,7 @@ export default configureStore({
 export type RootState = {
   files: FilesState,
   groups: GroupsState,
+  search: SearchState,
   global: GlobalState
 };
 

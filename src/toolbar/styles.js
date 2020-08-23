@@ -2,6 +2,12 @@ import styled from 'styled-components';
 import {DeleteSweep, Create} from '@styled-icons/material';
 import {FileCode} from '@styled-icons/fa-regular';
 import {Reload} from '@styled-icons/ionicons-outline/Reload';
+import {SearchAlt} from '@styled-icons/boxicons-regular/SearchAlt';
+
+export const SearchIcon = styled(SearchAlt)`
+  width: 12px;
+  margin-right: 5px;
+`;
 
 export const ReloadIcon = styled(Reload)`
   width: 12px;
@@ -48,10 +54,14 @@ export const FilesPopListItem = styled.li`
 `;
 
 export const FilesButton = styled.button`
-
 `;
 
 export const ReloadButton = styled.button`
+  font-size: 11px;
+  padding-top: 2px;
+`;
+
+export const SearchButton = styled.button`
   font-size: 11px;
   padding-top: 2px;
 `;

@@ -1,5 +1,5 @@
 import React, {useReducer} from 'react';
-import {ClearIcon, OutputIcon, ClearFilesSpan, FilesButton, FilesPop, FilesIcon, FilesPopList, FilesPopListItem, SmallFilesIcon, ReloadIcon, ReloadButton} from './styles';
+import {ClearIcon, OutputIcon, ClearFilesSpan, FilesButton, FilesPop, FilesIcon, FilesPopList, FilesPopListItem, SmallFilesIcon, ReloadIcon, ReloadButton, SearchIcon, SearchButton} from './styles';
 
 type FilesBtnProps = {
   files: string[]
@@ -63,6 +63,18 @@ export const ReloadBtn = ({onReload}: ReloadBtnProps) => (
     <ReloadIcon/>
     Reload
   </ReloadButton>
+);
+
+type SearchBtnProps = {
+  searchCount: number
+};
+
+export const SearchBtn = ({searchCount=0}: SearchBtnProps) => (
+  <SearchButton type="button" title="Search">
+    <SearchIcon />
+    Search
+    {searchCount ? ` (${searchCount})` : ''}
+  </SearchButton>
 );
 
 type ClearBtnProps = {

@@ -77,7 +77,7 @@ export const parseGroups = createAsyncThunk('files/parseGroups', async ({fileNam
 export function convertGroup(group: GroupData) {
   if (!group || !group.previewCards) return group;
 
-  group.previewCards = group.previewCards.map(c => convertCard(c));
+  group.previewCards = group.previewCards.map((c, index) => convertCard(c, index));
   return group;
 }
 
@@ -85,7 +85,7 @@ function isCardData(card: any): card is CardData {
   return card.clozeData && card.basicData;
 }
 
-function convertCard(card: CardDTO | CardData): CardData {
+function convertCard(card: CardDTO | CardData, index: number): CardData {
 
   if (!card) return card;
 
@@ -115,7 +115,7 @@ function convertCard(card: CardDTO | CardData): CardData {
     }
   }
 
-  return {...card, clozeData, basicData};
+  return {...card, index, clozeData, basicData};
 }
 
 const groupsDataToId = (groups: GroupsData) => groups.id;
@@ -175,6 +175,17 @@ const groupsSlice = createSlice({
 });
 
 const findByFile = (fileName: string) => (g: GroupsData): boolean => g.id === fileName;
+
+export const selectCard = (state: RootState) => (fileName: string, groupName: string, cardIndex: number) : CardData | null => {
+  const groupsData = normalizedObjectsGet(state.groups, fileName);
+  if (!groupsData) return null;
+  
+  const group = groupsData.groups.find(g => g.name === groupName);
+  if (!group) return null;
+
+  const cards = group.previewCards;
+  return cards.length > cardIndex ? cards[cardIndex] : null;
+}
 
 export const selectGroupsByFile = (fileName: string) => (state: RootState): GroupData[] => {
   const groupsSet = normalizedObjectsFindAll(state.groups, findByFile(fileName));
