@@ -1,4 +1,4 @@
-import {Item, findNode, insertNode} from './avl-tree';
+import {Item, findNode, insertNode, searchInNode, strMatchFn} from './avl-tree';
 import {GroupData} from '../types';
 import {cardHasError} from '../card/card-store';
 
@@ -15,7 +15,40 @@ function updateKeywordItem(item: any, id: string) {
 
 const toId = (group: string, cardIndex: number) => `${group}:${cardIndex}`;
 
-export async function searchKeyword(keywords: string[], index: any, fileName: string) {
+type ItemResult = {
+  item: Item,
+  cost: number,
+  score: number
+};
+
+export type ItemResultWithFileName = {
+  key: string,
+  fileName: string,
+  results: ItemResult[]
+}
+
+export function countItemResult(itemResults: ItemResultWithFileName[]): number {
+
+  let count = 0;
+  for (const i of itemResults) {
+    for (const j of i.results) {
+      count += j.item.value.length;
+    }
+  }
+
+  return count;
+}
+
+export async function searchKeyword(key: string, index: any, fileName: string): Promise<ItemResultWithFileName> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const results = searchInNode(index, {key, matchFn: strMatchFn});
+      resolve({key, fileName, results});
+    }, 0);
+  });
+}
+
+export async function searchKeywords(keywords: string[], index: any, fileName: string) {
   return new Promise((resolve) => {
     setTimeout(() => {
       const groups = keywords.flatMap(keyword => {

@@ -2,7 +2,7 @@ import React, { useCallback, useState, useEffect} from 'react';
 import * as ls from './styles';
 import { useHistory } from 'react-router-dom';
 import { useDispatch, useSelector} from 'react-redux';
-import { keepTerms, buildIndex, searchIndex, selectResults, selectSearchStatus } from './search-slice';
+import { buildIndex, searchIndex, selectResults, selectSearchStatus } from './search-slice';
 import { selectCard } from '../groups/groups-slice';
 import * as types from '../types';
 
@@ -22,7 +22,6 @@ export default ({latestTerms=[]}: SearchProps) => {
   const onSearch = useCallback((_) => {
     if (term && term.length > 1) {
       const keywords = term.split(' ');
-      dispatch(keepTerms(keywords));
       dispatch(searchIndex({keywords}));
     }
   }, [dispatch, term]);

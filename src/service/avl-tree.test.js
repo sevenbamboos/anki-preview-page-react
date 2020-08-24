@@ -1,4 +1,4 @@
-import {Item, insertNode, findNode} from './avl-tree';
+import {Item, insertNode, findNode, searchInNode, strMatchFn} from './avl-tree';
 
 function numberItem(n) {
   return new Item((x1, x2) => x1 - x2, n, n);
@@ -36,7 +36,7 @@ function outputLine(nodes) {
   }, aaccu).v;
 }
 
-describe('AVL Tree', () => {
+describe('avl tree', () => {
   test('check RL balance', () => {
     let root = null;
     root = insertNode(root, numberItem(5));
@@ -99,7 +99,7 @@ describe('AVL Tree', () => {
     let itemToFind;
     for (let i = 0; i < num; i++) {
       const key = randomStr(random(2, 10));
-      if (i === 0) itemToFind = key;
+      if (i === 90) itemToFind = key;
       if (itemKeys.has(key)) continue;
       else itemKeys.add(key);
       const item = strItem(key);
@@ -132,5 +132,11 @@ describe('AVL Tree', () => {
 
     const found = findNode(root, itemToFind);
     expect(found.item.key).toBe(itemToFind);
+
+    const results = searchInNode(root, {key: itemToFind, matchFn: strMatchFn, fuzzySearch: true});
+    results.forEach(result => {
+      console.log(result.toString());
+    });
+
   });
 });

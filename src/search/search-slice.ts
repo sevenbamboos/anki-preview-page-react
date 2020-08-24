@@ -14,7 +14,7 @@ import {
   normalizedObjectsClear
 } from '../common';
 
-import { addAllKeywords, searchKeyword } from '../service/keyword-index';
+import { addAllKeywords, ItemResultWithFileName, searchKeyword, countItemResult } from '../service/keyword-index';
 import {RootState} from '../app/app-store';
 
 export type SearchData = {
@@ -25,15 +25,27 @@ export type SearchData = {
 export type SearchResult = {
   fileName: string,
   groupName: string,
-  cardIndex: number
-}
+  cardIndex: number,
+  score: number
+};
+
+type SearchTerm = {
+  keyword: string,
+  results: ItemResultWithFileName[],
+  count: number
+};
 
 export type SearchState = NormalizedObjects<SearchData> & {
   status: FetchStatus,
   error: string | null,
-  latestTerms: string[],
+  latestTerms: SearchTerm[],
   results: SearchResult[]
 };
+
+type SearchTermWithResult = {
+  terms: SearchTerm[],
+  results: SearchResult[]
+}
 
 const initialState: SearchState = {
   status: statusIdle,
@@ -66,21 +78,42 @@ type Keywords = {
 export const searchIndex = createAsyncThunk('search/searchIndex', async ({keywords}: Keywords, {getState, rejectWithValue}) => {
   const searchState = (getState() as RootState).search;
 
-  const searchJobs = normalizedObjectsGetAll(searchState).map(
-    ({index, fileName}: SearchData) => searchKeyword(keywords, index, fileName) as Promise<any[]>);
+  const searchJobs = keywords.flatMap(key => {
+    return normalizedObjectsGetAll(searchState).map(({index, fileName}: SearchData) => searchKeyword(key, index, fileName));
+  });
 
   const result = await Promise.all(searchJobs);
 
-  return result.flatMap(fileNameWithGroupWithCards => {
+  const searchTerms: {[key:string]:ItemResultWithFileName[]} = {};
 
-    const [fileName, groupWithCards] = fileNameWithGroupWithCards;
-    return groupWithCards.map((groupWithCard:string) => {
-      const [groupName, cardIndexInString] = groupWithCard.split(':');
-      const cardIndex = Number.parseInt(cardIndexInString);
-      return {fileName, groupName, cardIndex} as SearchResult; 
-    });
-  }) as SearchResult[];
+  const searchResults: SearchResult[] = [];
 
+  result.forEach(itemResultWithFileName => {
+
+    const {key, fileName, results} = itemResultWithFileName;
+    if (!searchTerms[key]) {
+      searchTerms[key] = []
+    }
+    searchTerms[key].push(itemResultWithFileName);
+
+    searchResults.push(...results.flatMap(({item, score}) => {
+      return item.value.map((groupWithCard:string) => {
+        const [groupName, cardIndexInString] = groupWithCard.split(':');
+        const cardIndex = Number.parseInt(cardIndexInString);
+        return {fileName, groupName, cardIndex, score} as SearchResult; 
+      });
+    }));
+  });
+
+  const terms = Object.keys(searchTerms).map((key: string) => {
+    const itemResults = searchTerms[key];
+    return {
+      keyword: key, 
+      results: itemResults,
+      count: countItemResult(itemResults)
+    }
+  });
+  return {terms, results: searchResults };
 });
 
 const searchDataToId = (search: SearchData) => search.fileName;
@@ -91,9 +124,6 @@ const searchSlice = createSlice({
   name: 'search',
   initialState,
   reducers: {
-    keepTerms(state, action) {
-      state.latestTerms.push(...(action.payload as string[]));
-    },
     reset(state) {
       normalizedObjectsClear(state);
     }
@@ -130,7 +160,9 @@ const searchSlice = createSlice({
 
     builder.addCase(searchIndex.fulfilled, (state, action) => {
       state.status = statusSucceeded;
-      const results = action.payload;
+      const {terms, results} = action.payload;
+      state.latestTerms.push(...terms.filter(t => t.count> 0));
+      results.sort((r1, r2) => r2.score - r1.score);
       state.results = results;
     });
 
@@ -143,6 +175,6 @@ const searchSlice = createSlice({
 export const selectResults = (state: RootState): SearchResult[] => state.search.results;
 export const selectSearchStatus = (state: RootState): string => state.search.status;
 
-export const { reset, keepTerms } = searchSlice.actions;
+export const { reset }  = searchSlice.actions;
 
 export default searchSlice.reducer;
