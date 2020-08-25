@@ -24,7 +24,7 @@ type ItemResult = {
 };
 
 export type ItemResultWithFileName = {
-  key: string,
+  keyword: string,
   fileName: string,
   results: ItemResult[]
 }
@@ -48,11 +48,11 @@ export function countItemResult(itemResults: ItemResultWithFileName[]): CountAnd
   return {count, cost};
 }
 
-export async function searchKeyword(key: string, index: any, fileName: string): Promise<ItemResultWithFileName> {
+export async function searchKeyword(keyword: string, index: any, fileName: string): Promise<ItemResultWithFileName> {
   return new Promise((resolve) => {
     setTimeout(() => {
-      const results = searchInNode(index, {key, matchFn: strMatchFn});
-      resolve({key, fileName, results});
+      const results = searchInNode(index, {key: keyword, matchFn: strMatchFn});
+      resolve({keyword, fileName, results});
     }, 0);
   });
 }
@@ -110,7 +110,7 @@ function addKeywords(keywords: string[], group: string, cardIndex: number, index
 
     const node = findNode(treeEntry, keyword);
     const id = toId(group, cardIndex);
-    
+
     if (node) {
       updateKeywordItem(node.item, id);
     } else {

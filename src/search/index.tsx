@@ -5,7 +5,7 @@ import { useDispatch, useSelector} from 'react-redux';
 import { buildIndex, searchIndex, selectResults, selectSearchStatus, selectTerms, SearchTerm } from './search-slice';
 import { selectCard } from '../groups/groups-slice';
 import * as types from '../types';
-import { cardHasError, cardHasQA } from '../card/card-store';
+import { cardHasError } from '../card/card-store';
 
 type SearchProps = {
   latestTerms: string[],
@@ -22,33 +22,48 @@ const Term = ({term}: TermProps) => {
 };
 
 type ResultItemProps = {
+  score: number,
+  term: string,
   card: types.CardData
 };
 
-const ResultItem = ({card}: ResultItemProps) => {
+const ResultItem = ({card, term, score}: ResultItemProps) => {
   return (
     <ls.ResultCard>
       {card.forBasic && card.basicData &&
-        <CardBasicSection basicData={card.basicData} />
+        <CardBasicSection basicData={card.basicData} term={term} />
       }
       {/* {card.forCloze && card.clozeData &&
         <CardClozeSection clozeData={card.clozeData} />
       } */}
+      <aside>score: {score}, key: {term}</aside>
       <footer>{card.tags}</footer>
     </ls.ResultCard>
   );
 };
 
-const CardBasicSection = ({basicData}: {basicData: types.EQA}) => {
+const CardBasicSection = ({basicData, term}: {basicData: types.EQA, term: string}) => {
 
   if (cardHasError(basicData)) {
     return <span>error</span>
   }
 
+  const answerParts = basicData.answer.split(term).map((part, index, array) => {
+    const termPart = part && index < array.length-1 ? 
+      <ls.ResultCardAnswerTermPart>{term}</ls.ResultCardAnswerTermPart> :
+      null;
+    return (
+      <>
+        <ls.ResultCardAnswerPart>{part}</ls.ResultCardAnswerPart>
+        {termPart}
+      </>
+    );
+  });
+
   return (
     <>
       {/* <span>{basicData.question}</span> */}
-      <span>{basicData.answer}</span>
+      <span>{answerParts}</span>
     </>
   );
 };
@@ -109,11 +124,11 @@ export default ({latestTerms=[]}: SearchProps) => {
   } else if (results && results.length) {
     resultSection = <ls.ResultCardContainer>
       {results.map(result => {
-        const {fileName, groupName, cardIndex} = result;
+        const {fileName, groupName, cardIndex, score, key: term} = result;
         const cardData = card(fileName, groupName, cardIndex);
         const key = fileName+groupName+cardIndex;
         if (cardData) {
-          return <ResultItem card={cardData} /> 
+          return <ResultItem card={cardData} score={score} term={term} /> 
         } else {
           return <ls.ResultCard key={key}>{result.fileName}, {result.groupName}, {result.cardIndex}</ls.ResultCard>;
         }

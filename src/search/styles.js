@@ -67,6 +67,11 @@ export const TermList = styled.div`
   list-style-type: none;
   padding-left: 0;
   margin: 0;
+
+  button {
+    font-size: 10px;
+    margin: 5px;
+  }
 `;
 
 export const ResultList = styled.div`
@@ -92,5 +97,18 @@ export const ResultCard = styled.div`
   &:hover{
     background: #eeeeee;
   }
+
+  footer {
+    float: right;
+    background: pink;
+  }
 `;
 
+export const ResultCardAnswerPart = styled.span`
+`;
+
+export const ResultCardAnswerTermPart = styled.span`
+  background: yellow;
+  padding: 2px;
+  margin: 2px;
+`;

@@ -28,7 +28,8 @@ export type SearchResult = {
   fileName: string,
   groupName: string,
   cardIndex: number,
-  score: number
+  score: number,
+  key: string
 };
 
 export type SearchTerm = {
@@ -44,11 +45,6 @@ export type SearchState = NormalizedObjects<SearchData> & {
   latestTerms: SearchTerm[],
   results: SearchResult[]
 };
-
-// type SearchTermWithResult = {
-//   terms: SearchTerm[],
-//   results: SearchResult[]
-// }
 
 const initialState: SearchState = {
   status: statusIdle,
@@ -83,8 +79,8 @@ const filterKeywords = (k:string) => k.length > 1 && !BlackList.includes(k.toLoc
 export const searchIndex = createAsyncThunk('search/searchIndex', async ({keywords}: Keywords, {getState, rejectWithValue}) => {
   const searchState = (getState() as RootState).search;
 
-  const searchJobs = keywords.filter(filterKeywords).flatMap(key => {
-    return normalizedObjectsGetAll(searchState).map(({index, fileName}: SearchData) => searchKeyword(key, index, fileName));
+  const searchJobs = keywords.filter(filterKeywords).flatMap(keyword => {
+    return normalizedObjectsGetAll(searchState).map(({index, fileName}: SearchData) => searchKeyword(keyword, index, fileName));
   });
 
   const result = await Promise.all(searchJobs);
@@ -95,17 +91,18 @@ export const searchIndex = createAsyncThunk('search/searchIndex', async ({keywor
 
   result.forEach(itemResultWithFileName => {
 
-    const {key, fileName, results} = itemResultWithFileName;
-    if (!searchTerms[key]) {
-      searchTerms[key] = []
+    const {keyword, fileName, results} = itemResultWithFileName;
+    if (!searchTerms[keyword]) {
+      searchTerms[keyword] = []
     }
-    searchTerms[key].push(itemResultWithFileName);
+    searchTerms[keyword].push(itemResultWithFileName);
 
     searchResults.push(...results.flatMap(({item, score}) => {
+      const key = item.key;
       return item.value.map((groupWithCard:string) => {
         const [groupName, cardIndexInString] = groupWithCard.split(':');
         const cardIndex = Number.parseInt(cardIndexInString);
-        return {fileName, groupName, cardIndex, score} as SearchResult; 
+        return {fileName, groupName, cardIndex, score, key} as SearchResult; 
       });
     }));
   });
@@ -169,7 +166,8 @@ const searchSlice = createSlice({
       state.status = statusSucceeded;
       const {terms, results} = action.payload;
       
-      state.latestTerms.push(...terms.filter(t => t.count> 0));
+      const notExisting = (t:{keyword:string}) => state.latestTerms.every(term => term.keyword !== t.keyword);
+      state.latestTerms.push(...terms.filter(t => t.count> 0 && notExisting(t)));
       if (state.latestTerms.length > 5) {
         state.latestTerms.splice(0, state.latestTerms.length - 5);
       }
