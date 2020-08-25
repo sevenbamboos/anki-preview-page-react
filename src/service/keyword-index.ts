@@ -2,6 +2,8 @@ import {Item, findNode, insertNode, searchInNode, strMatchFn} from './avl-tree';
 import {GroupData} from '../types';
 import {cardHasError} from '../card/card-store';
 
+import BlackList from '../service/keywords-black-list.json';
+
 function keywordItem(keyword: string, id: string) {
   return new Item((k1: string, k2: string) => k1.localeCompare(k2), keyword, [id]);
 }
@@ -27,16 +29,23 @@ export type ItemResultWithFileName = {
   results: ItemResult[]
 }
 
-export function countItemResult(itemResults: ItemResultWithFileName[]): number {
+type CountAndCost = {
+  count: number,
+  cost: number
+}
+
+export function countItemResult(itemResults: ItemResultWithFileName[]): CountAndCost {
 
   let count = 0;
+  let cost = 0;
   for (const i of itemResults) {
     for (const j of i.results) {
       count += j.item.value.length;
+      cost += j.cost;
     }
   }
 
-  return count;
+  return {count, cost};
 }
 
 export async function searchKeyword(key: string, index: any, fileName: string): Promise<ItemResultWithFileName> {
@@ -92,10 +101,16 @@ export async function addAllKeywords(groups: GroupData[]) {
 
 function addKeywords(keywords: string[], group: string, cardIndex: number, index: any) {
   let treeEntry = index;
-  for (const keyword of keywords) {
+  for (let keyword of keywords) {
+    
     if (!keyword) continue;
+    
+    keyword = keyword.toLocaleLowerCase();
+    if (BlackList.includes(keyword)) continue;
+
     const node = findNode(treeEntry, keyword);
     const id = toId(group, cardIndex);
+    
     if (node) {
       updateKeywordItem(node.item, id);
     } else {

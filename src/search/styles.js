@@ -62,17 +62,33 @@ export const ControlButton = styled.button`
   margin: 5px;
 `;
 
-export const ResultList = styled.div`
+export const TermList = styled.div`
   font-size: 13px;
   list-style-type: none;
   padding-left: 0;
   margin: 0;
 `;
 
-export const ResultItem = styled.div`
-  border-bottom: #777 1px solid;
-  padding-left: 20px;
-  line-height: 30px;
+export const ResultList = styled.div`
+  font-size: 13px;
+  list-style-type: none;
+  padding-left: 0;
+  margin: 0;
+  display: flex;
+`;
+
+export const ResultCardContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+`;
+
+export const ResultCard = styled.div`
+  width: 45%;
+  padding: 5px;
+  margin: 5px;
+  font-size: 10px;
+  outline-style: dashed;
+  outline-width: 1px;
   &:hover{
     background: #eeeeee;
   }

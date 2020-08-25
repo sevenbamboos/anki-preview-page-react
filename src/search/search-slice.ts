@@ -17,6 +17,8 @@ import {
 import { addAllKeywords, ItemResultWithFileName, searchKeyword, countItemResult } from '../service/keyword-index';
 import {RootState} from '../app/app-store';
 
+import BlackList from '../service/keywords-black-list.json';
+
 export type SearchData = {
   fileName: string,
   index: any 
@@ -29,10 +31,11 @@ export type SearchResult = {
   score: number
 };
 
-type SearchTerm = {
+export type SearchTerm = {
   keyword: string,
   results: ItemResultWithFileName[],
-  count: number
+  count: number,
+  cost: number
 };
 
 export type SearchState = NormalizedObjects<SearchData> & {
@@ -42,10 +45,10 @@ export type SearchState = NormalizedObjects<SearchData> & {
   results: SearchResult[]
 };
 
-type SearchTermWithResult = {
-  terms: SearchTerm[],
-  results: SearchResult[]
-}
+// type SearchTermWithResult = {
+//   terms: SearchTerm[],
+//   results: SearchResult[]
+// }
 
 const initialState: SearchState = {
   status: statusIdle,
@@ -75,10 +78,12 @@ type Keywords = {
   keywords: string[],
 }
 
+const filterKeywords = (k:string) => k.length > 1 && !BlackList.includes(k.toLocaleLowerCase())
+
 export const searchIndex = createAsyncThunk('search/searchIndex', async ({keywords}: Keywords, {getState, rejectWithValue}) => {
   const searchState = (getState() as RootState).search;
 
-  const searchJobs = keywords.flatMap(key => {
+  const searchJobs = keywords.filter(filterKeywords).flatMap(key => {
     return normalizedObjectsGetAll(searchState).map(({index, fileName}: SearchData) => searchKeyword(key, index, fileName));
   });
 
@@ -107,10 +112,12 @@ export const searchIndex = createAsyncThunk('search/searchIndex', async ({keywor
 
   const terms = Object.keys(searchTerms).map((key: string) => {
     const itemResults = searchTerms[key];
+    const {count, cost} = countItemResult(itemResults);
     return {
       keyword: key, 
       results: itemResults,
-      count: countItemResult(itemResults)
+      count,
+      cost
     }
   });
   return {terms, results: searchResults };
@@ -161,7 +168,12 @@ const searchSlice = createSlice({
     builder.addCase(searchIndex.fulfilled, (state, action) => {
       state.status = statusSucceeded;
       const {terms, results} = action.payload;
+      
       state.latestTerms.push(...terms.filter(t => t.count> 0));
+      if (state.latestTerms.length > 5) {
+        state.latestTerms.splice(0, state.latestTerms.length - 5);
+      }
+
       results.sort((r1, r2) => r2.score - r1.score);
       state.results = results;
     });
@@ -173,6 +185,7 @@ const searchSlice = createSlice({
 });
 
 export const selectResults = (state: RootState): SearchResult[] => state.search.results;
+export const selectTerms = (state: RootState): SearchTerm[] => state.search.latestTerms;
 export const selectSearchStatus = (state: RootState): string => state.search.status;
 
 export const { reset }  = searchSlice.actions;
