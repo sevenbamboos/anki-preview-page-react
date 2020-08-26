@@ -43,6 +43,10 @@ import {
 } from './groups/groups-slice';
 
 import {
+  reset as resetSearchAction,
+} from './search/search-slice';
+
+import {
   selectError,
   selectMessage
 } from './app/app-slice';
@@ -65,6 +69,7 @@ function App() {
   const selectedGroupsFromReduxStore = useSelector(selectSelectedGroups);
 
   const clearFiles = useCallback(async () => {
+    dispatch(resetSearchAction());
     dispatch(resetGroupsAction());
     dispatch(clearFilesAction());
     gotoHome();

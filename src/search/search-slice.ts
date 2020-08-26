@@ -130,6 +130,8 @@ const searchSlice = createSlice({
   reducers: {
     reset(state) {
       normalizedObjectsClear(state);
+      state.results = [];
+      state.latestTerms = [];
     }
   },
   extraReducers: builder => {

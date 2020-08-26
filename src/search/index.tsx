@@ -24,66 +24,67 @@ const Term = ({term}: TermProps) => {
 type ResultItemProps = {
   score: number,
   term: string,
-  card: types.CardData
+  card: types.CardData,
+  id: string
 };
 
-const ResultItem = ({card, term, score}: ResultItemProps) => {
+const ResultItem = ({card, term, score, id}: ResultItemProps) => {
+  const tags = card.tags.split(' ');
+  const tagStr = tags.length ? tags[tags.length-1] : card.tags;
   return (
     <ls.ResultCard>
       {card.forBasic && card.basicData &&
-        <CardBasicSection basicData={card.basicData} term={term} />
+        <CardBasicSection basicData={card.basicData} term={term} key={id} score={score} />
       }
-      {/* {card.forCloze && card.clozeData &&
-        <CardClozeSection clozeData={card.clozeData} />
-      } */}
-      {/* <aside>score: {score}, key: {term}</aside> */}
-      <footer>{card.tags}</footer>
+      <footer>{tagStr}</footer>
     </ls.ResultCard>
   );
 };
 
-const CardBasicSection = ({basicData, term}: {basicData: types.EQA, term: string}) => {
+const CardBasicSection = ({basicData, term, score}: {basicData: types.EQA, term: string, score: number}) => {
 
   if (cardHasError(basicData)) {
     return <span>error</span>
   }
 
   const answerParts = basicData.answer.split(term).map((part, index, array) => {
+
+    const scoreMark = score < 100 ? <ls.QuestionIcon title={String(score)} /> : null;
+
     const termPart = part && index < array.length-1 ? 
-      <ls.ResultCardAnswerTermPart>{term}</ls.ResultCardAnswerTermPart> :
+      <ls.ResultCardAnswerTermPart>{term}{scoreMark}</ls.ResultCardAnswerTermPart> :
       null;
     return (
-      <>
+      <span key={index}>
         <ls.ResultCardAnswerPart>{part}</ls.ResultCardAnswerPart>
         {termPart}
-      </>
+      </span>
     );
   });
 
   return (
     <>
-      {/* <span>{basicData.question}</span> */}
       <span>{answerParts}</span>
     </>
   );
 };
 
-const CardClozeSection = ({clozeData}: {clozeData: types.EQA}) => {
-  if (cardHasError(clozeData)) {
-    return <span>error</span>
-  }
+// const CardClozeSection = ({clozeData}: {clozeData: types.EQA}) => {
+//   if (cardHasError(clozeData)) {
+//     return <span>error</span>
+//   }
 
-  return (
-    <>
-      <span>{clozeData.question}</span>
-      <span>{clozeData.answer}</span>
-    </>
-  );
-};
+//   return (
+//     <>
+//       <span>{clozeData.question}</span>
+//       <span>{clozeData.answer}</span>
+//     </>
+//   );
+// };
 
-const CardSourceSection = ({source}: {source:string}) => (
-  <span>{source}</span>
-);
+// const CardSourceSection = ({source}: {source:string}) => (
+//   <span>{source}</span>
+// );
 
 export default ({latestTerms=[]}: SearchProps) => {
 
@@ -126,9 +127,9 @@ export default ({latestTerms=[]}: SearchProps) => {
       {results.map(result => {
         const {fileName, groupName, cardIndex, score, key: term} = result;
         const cardData = card(fileName, groupName, cardIndex);
-        const key = fileName+groupName+cardIndex;
+        const key = fileName+groupName+cardIndex+term;
         if (cardData) {
-          return <ResultItem card={cardData} score={score} term={term} /> 
+          return <ResultItem key={key} id={key} card={cardData} score={score} term={term} /> 
         } else {
           return <ls.ResultCard key={key}>{result.fileName}, {result.groupName}, {result.cardIndex}</ls.ResultCard>;
         }
@@ -165,7 +166,7 @@ export default ({latestTerms=[]}: SearchProps) => {
 
       <ls.TermList>
         {terms.map(term => (
-          <Term term={term} />
+          <Term key={term.keyword} term={term} />
         ))}
       </ls.TermList>
 

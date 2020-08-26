@@ -110,6 +110,7 @@ const filesSlice = createSlice({
     builder.addCase(clearFiles.fulfilled, (state, action) => {
       state.status = statusSucceeded;
       normalizedObjectsClear(state);
+      state.checkedFiles = [];
     });
 
     builder.addCase(clearFiles.rejected, (state, action) => {

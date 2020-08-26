@@ -7,6 +7,8 @@ Questions in Markdown
 
 ## Output
 Basic question-answer cards and clozing cards
+Card Reporting
+Full-text search
 
 ## Language 
  * Typescript
@@ -45,3 +47,6 @@ Check the question in clozing format:
 
 Card report shows the numbers of clozing/basic cards:
 ![Card Report](https://github.com/sevenbamboos/anki-preview-page-react/blob/master/design/card-report.png)
+
+Support full-text search:
+![Keyword Search](https://github.com/sevenbamboos/anki-preview-page-react/blob/master/design/keyword-search.png)

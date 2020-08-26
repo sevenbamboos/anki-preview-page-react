@@ -1,6 +1,13 @@
 import styled from 'styled-components';
 import {Close} from '@styled-icons/material';
 import {SearchAlt} from '@styled-icons/boxicons-regular/SearchAlt';
+import {Question} from '@styled-icons/fa-solid/Question';
+
+export const QuestionIcon = styled(Question)`
+  width: 6px;
+  margin-left: 2px;
+  margin-bottom: 2px;
+`;
 
 export const SearchIcon = styled(SearchAlt)`
   width: 12px;
@@ -109,6 +116,5 @@ export const ResultCardAnswerPart = styled.span`
 
 export const ResultCardAnswerTermPart = styled.span`
   background: yellow;
-  padding: 2px;
   margin: 2px;
 `;
