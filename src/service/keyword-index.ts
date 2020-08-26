@@ -87,7 +87,12 @@ export async function addAllKeywords(groups: GroupData[]) {
         for (const card of group.previewCards) {
           const basicData = card.basicData;
           if (basicData && !cardHasError(basicData)) {
-            const keywords = basicData.question.split(' ');
+            let question = basicData.question;
+            const indexOfExtra = question.indexOf('(');
+            if (indexOfExtra !== -1) {
+              question = question.slice(0, indexOfExtra);
+            }
+            const keywords = question.split(/[ /]/);
             index = addKeywords(keywords, group.name, card.index, index);
           }
         }

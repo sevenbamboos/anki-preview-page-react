@@ -36,7 +36,7 @@ const ResultItem = ({card, term, score}: ResultItemProps) => {
       {/* {card.forCloze && card.clozeData &&
         <CardClozeSection clozeData={card.clozeData} />
       } */}
-      <aside>score: {score}, key: {term}</aside>
+      {/* <aside>score: {score}, key: {term}</aside> */}
       <footer>{card.tags}</footer>
     </ls.ResultCard>
   );
